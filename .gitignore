@@ -1,0 +1,5 @@
+# LibreOffice
+**/.~lock.*
+
+# Documentation build folder
+documentation/build
