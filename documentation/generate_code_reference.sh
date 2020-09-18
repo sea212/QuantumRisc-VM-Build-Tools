@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Relative path starting from docs/source
 SCRIPT_BASE_FOLDER="../../build_tools"
 
