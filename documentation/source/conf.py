@@ -1,4 +1,4 @@
-from os import chdir
+from os import chdir, getcwd
 from subprocess import call
 
 # Configuration file for the Sphinx documentation builder.
@@ -55,5 +55,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # Create script index
+previous_path = getcwd()
 chdir('..')
 rc = call('./generate_code_reference.sh', shell=True)
+chdir(previous_path)
