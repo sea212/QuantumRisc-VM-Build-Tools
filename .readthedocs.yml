@@ -10,4 +10,4 @@ sphinx:
   configuration: documentation/source/conf.py
 
 # Optionally build your docs in additional formats such as PDF
-# formats: all
+formats: all
