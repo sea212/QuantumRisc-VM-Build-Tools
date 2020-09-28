@@ -3,7 +3,7 @@
 QuantumRisc-VM-Build-Tools
 ==========================
 
-Comming soon
+Please refer to the |Documentation Status|
 
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/quantumrisc-vm-build-tools/badge/?version=latest

@@ -17,7 +17,7 @@ Prerequisites
 Setup
 -----
 
-Download and and extract the QuantumRisc-VM from the link mentioned in :ref:`usage-prerequisites`. You can get yourself a coffee or a tee, because the archive is >10GB large and the extraction takes more than half an hour. Also install VirtualBox, following the instructions given at the vendors page.
+Download and extract the QuantumRisc-VM from the link mentioned in :ref:`usage-prerequisites`. You can get yourself a coffee or a tee, because the archive is >10GB large and the extraction takes more than half an hour. Also install VirtualBox, following the instructions given at the vendors page.
 
 
 .. _usage-setting-up-vb:

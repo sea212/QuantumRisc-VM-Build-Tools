@@ -139,6 +139,8 @@ Beside configuration entries for tools, projects can also be configured. The con
 The configuration parameter names for projects follow the name conception *PROJECT_PARAMETER=VALUE*. You can toggle whether you'd like the project to be installed by specifying ``PROJECT=true``. Currently the projects are limited to projects that can be pulled by using git. The git repository url can be specified as an HTTP-link in the ``PROJECT_URL=HTTPURL`` parameter. The state of the git repository that should be used is reflected in the ``PROJECT_TAG=STATE`` parameter. *STATE* can either be a branch name, a tag or a commit hash.
 
 
+.. _fully-automated-script-usage:
+
 Usage
 ^^^^^
 After configuring the tools and projects that shall be installed by adjusting :ref:`script-build_tools-config.cfg`, execute the install script :ref:`script-build_tools-install_everything.sh` and toggle the *-h* parameter (note that the real execution requires superuser privileges):
