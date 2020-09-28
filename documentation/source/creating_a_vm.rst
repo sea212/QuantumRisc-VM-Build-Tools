@@ -6,8 +6,9 @@ In this section you can learn how to setup a virtual machine, how to configure t
 Prerequisites
 -------------
 
-* `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`__
+* `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`__ (tested with version 6.1.10_Ubuntu r138449)
 * `Ubuntu 20.04 LTS setup iso <https://releases.ubuntu.com/20.04.1/ubuntu-20.04.1-desktop-amd64.iso>`__
+* `VM build tools <https://github.com/sea212/QuantumRisc-VM-Build-Tools/tree/master/build_tools>`__
 * >6GB RAM
 * >70GB hard disk space (~54GB for the VM, ~12GB to archive it)
 

@@ -10,6 +10,7 @@ Prerequisites
 -------------
 
 * `Ubuntu <https://releases.ubuntu.com/20.04.1/ubuntu-20.04.1-desktop-amd64.iso>`__ (tested with version 20.04 LTS)
+* `Build tools <https://github.com/sea212/QuantumRisc-VM-Build-Tools/tree/master/build_tools>`__
 * Bash (tested with version 5.0.17)
 * Apt package manager (tested with version 2.0.2ubuntu0.1)
 

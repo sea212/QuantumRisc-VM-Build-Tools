@@ -4,3 +4,6 @@
 # Documentation build folder
 documentation/build
 documentation/source/_build
+
+# Python version/venv file
+.python-version

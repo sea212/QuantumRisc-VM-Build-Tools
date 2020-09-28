@@ -16,7 +16,7 @@ set -e
 
 # required tools
 TOOLS="build-essential git gcc make libtool pkg-config autoconf automake \
-       texinfo libftdi-dev libusb-1.0-0-dev"
+       texinfo libftdi-dev libusb-1.0-0-dev libyaml-dev"
 
 # install and upgrade tools
 apt-get update

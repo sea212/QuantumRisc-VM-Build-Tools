@@ -10,7 +10,7 @@ Prerequisites
 -------------
 
 * `QuantumRisc-VM <https://random-oracles.org/risc-v/>`__
-* `VirtualBox (or any other virtualization software) <https://www.virtualbox.org/wiki/Downloads>`__
+* `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`__ (tested with version 6.1.10_Ubuntu r138449)
 * >70GB hard disk space
 
 
