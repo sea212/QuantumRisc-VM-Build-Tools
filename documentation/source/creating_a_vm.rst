@@ -42,9 +42,9 @@ Configuring and running the fully automatic install procedure
 
 Copy the folder *build_tools* from the `QuantumRisc-VM git project <https://github.com/sea212/QuantumRisc-VM-Build-Tools>`__ to */opt/QuantumRisc-Tools*. Change the current directory to */opt/QuantumRisc-Tools/build_tools*.
 
-Configure the fully automated and configurable tools and project install script as desired. Instruction can be found on section :ref:`fully-automated-script` of the scripts chapter. After an adequate configuration was created, run the install script with the desired flags (usually *-d* is enough), as explained in section :ref:`fully-automated-script-usage` of the scripts chapter:
+Configure the fully automated and configurable tools and project install script as desired. Instruction can be found on section :ref:`fully-automated-script` of the scripts chapter. After an adequate configuration was created, run the install script with the desired flags (usually *-c* is enough), as explained in section :ref:`fully-automated-script-usage` of the scripts chapter:
 
-``sudo ./install_everything.sh -d``
+``sudo ./install_everything.sh -c``
 	
 Finally, clean up traces you left during the setup:
 

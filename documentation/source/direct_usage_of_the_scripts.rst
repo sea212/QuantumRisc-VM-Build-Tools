@@ -50,16 +50,17 @@ After the build essentials have been installed, we can build and install the too
 
 This prints the following output (for verilator)::
 
-    install_verilator.sh [-h] [-i] [-c] [-d dir] [-t tag] -- Clone latested tagged verilator
-    version and build it. Optionally select the build directory and version, install binaries
-    and cleanup setup files.
+    install_verilator.sh [-h] [-c] [-d dir] [-i path] [-t tag] -- Clone latested tagged verilator
+    version and build it. Optionally select the build directory and version, install binaries and
+    cleanup setup files.
 
     where:
-        -h  		show this help text
-        -i  		install binaries
-        -c  		cleanup project
-        -d dir 		build files in "dir" (default: build_and_install_verilator)
-        -t tag		specify version (git tag or commit hash) to pull (default: Latest tag)
+        -h          show this help text
+        -c          cleanup project
+        -d dir      build files in "dir" (default: build_and_install_verilator)
+        -i path     install binaries to path (use "default" to use default path)
+        -t tag      specify version (git tag or commit hash) to pull (default: Latest tag)
+
 
 .. _tool-build-and-install-scripts-parameters:
 
@@ -74,7 +75,7 @@ The source code version that should be pulled can be specified by using the *-t*
 
 The default behaviour (in case *-t* was not specified) is to pull the default branch. Before using the *stable* option, be sure to check whether the repository stopped to use tags at some point in time. If this is the case, the script will pull and use an outdated version, because it does not check timestamps. If no tags are found, the default branch is used.
 
-The scripts only build the tools by default. To also install them (using the default path specified in the tool itself), execute the script with the *-i* flag. There is currently no way to specify the installation path by using the scripts supplied with this project. A workaround would be to set environment variables used by the tools own build scripts.
+The scripts only builds the tools by default. To also install them (using the default path specified in the tool itself), execute the script with the *-i* flag. The *-i* flag takes one parameter, which is used to specify the install path. Set it to default to use the default install path preconfigured within the tool in question.
 
 The last default flag is the *-c* flag, which deletes all files after the tool has been successfully installed. It is only relevant if the *-i* flag is supplied at the same invocation. Otherwise a tool that was build but not installed would be removed, which is obviously pointless because it is equivalent to no changes at all.
 
@@ -102,18 +103,20 @@ Tool configuration
 ~~~~~~~~~~~~~~~~~~
 .. code-block::
     :linenos:
-    :lineno-start: 114
+    :lineno-start: 130
     
     ## Verilator
-    # build and (if desired) install Verilator?
+    # Build and (if desired) install Verilator?
     VERILATOR=true
     # Build AND install Verilator?
     VERILATOR_INSTALL=true
+    # Install path (default = default path)
+    VERILATOR_INSTALL_PATH=default
     # Remove build directory after successful install?
     VERILATOR_CLEANUP=true
     # Folder name in which the project is built
     VERILATOR_DIR=default
-    # Specify git branch or commit hash to pull (default = latest tag)
+    # Specify project version to pull (default/latest, stable, tag, branch, hash)
     VERILATOR_TAG=default
     
 The configuration parameter names for tools follow the name conception *TOOLNAME_PARAMETER=VALUE*. The ``TOOL=true`` flag specifies whether this tool should be build and optionally installed or whether it should be ignored. Other than that, the four basic tool build and install script flags, that were described in :ref:`Tool build and install script parameters <tool-build-and-install-scripts-parameters>`, are mirrored by the config parameters followed by ``TOOL=true``. This is the minimal configuration, at the same time it is the complete set of configuration parameters for most of the tools.

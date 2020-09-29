@@ -28,22 +28,23 @@ ICESTORM_ICEBOX_DIR="icestorm"
 
 
 # parse arguments
-USAGE="$(basename "$0") [-h] [-i] [-c] [-e] [-d dir] [-l path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory, chip files, chipset and version, install binaries and cleanup setup files.
+USAGE="$(basename "$0") [-h] [-c] [-e] [-d dir] [-i path] [-l path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory, chip files, chipset and version, install binaries and cleanup setup files.
 
 where:
     -h          show this help text
-    -i          install binaries
     -c          cleanup project
     -e          install NextPNR for ecp5 chips (default: ice40)
     -d dir      build files in \"dir\" (default: ${BUILDFOLDER})
+    -i path     install binaries to path (use \"default\" to use default path)
     -l path     use local chip files for ice40 or ecp5 from \"path\" (use empty string for default path in ubuntu)
     -t tag      specify version (git tag or commit hash) to pull (default: Latest tag)"
    
  
-while getopts ":ie" OPTION; do
+while getopts ":hecd:i:t:l:" OPTION; do
     case $OPTION in
         i)  INSTALL=true
-            echo "-i set: Installing built binaries"
+            INSTALL_PREFIX="$OPTARG"
+            echo "-i set: Installing built binaries to $INSTALL_PREFIX"
             ;;
         e)  echo "-e set: Installing NextPNR for ecp5 chipset"
             CHIP="ecp5"
@@ -53,7 +54,7 @@ done
 
 OPTIND=1
 
-while getopts ':hiecd:t:l:' OPTION; do
+while getopts ':hecd:i:t:l:' OPTION; do
     case "$OPTION" in
     h)  echo "$USAGE"
         exit
@@ -150,7 +151,11 @@ fi
 if [ "$CHIP" = "ice40" ]; then
     # is icestorm installed?
     if [ -n "$LIBPATH" ]; then
-        cmake -DARCH=ice40 -DICEBOX_ROOT=${LIBPATH} .
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            cmake -DARCH=ice40 -DICEBOX_ROOT=${LIBPATH} .
+        else
+            cmake -DARCH=ice40 -DICEBOX_ROOT=${LIBPATH} -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" .
+        fi
     else
         echo "Note: Pulling Icestorm from Github."
         
@@ -170,13 +175,22 @@ if [ "$CHIP" = "ice40" ]; then
         make install DESTDIR=$NEXTPNR_FOLDER PREFIX=''
         popd +0 > /dev/null
         # build nextpnr-ice40 next
-        cmake -j$(nproc) -DARCH=ice40 -DICEBOX_ROOT="${NEXTPNR_FOLDER}/share/icebox" .
+        
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            cmake -j$(nproc) -DARCH=ice40 -DICEBOX_ROOT="${NEXTPNR_FOLDER}/share/icebox" .
+        else
+            cmake -j$(nproc) -DARCH=ice40 -DICEBOX_ROOT="${NEXTPNR_FOLDER}/share/icebox" -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" .
+        fi
     fi
 # chip ecp5?
 else
     # is project trellis installed?
     if [ -d "$LIBPATH" ]; then
-        cmake -j$(nproc) -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX=${LIBPATH} .
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            cmake -j$(nproc) -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX=${LIBPATH} .
+        else
+            cmake -j$(nproc) -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX=${LIBPATH} -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" .
+        fi
     else
         echo "Note: Pulling Trellis from Github."
         
@@ -190,7 +204,12 @@ else
         make -j$(nproc)
         make install
         popd +0 > /dev/null
-        cmake -j$(nproc) -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX="$TRELLIS_MAKE_PATH" .
+        
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            cmake -j$(nproc) -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX="$TRELLIS_MAKE_PATH" .
+        else
+            cmake -j$(nproc) -DARCH=ecp5 -DTRELLIS_INSTALL_PREFIX="$TRELLIS_MAKE_PATH" -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" .
+        fi
     fi
 fi
 
