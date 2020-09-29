@@ -35,34 +35,34 @@ where:
     -d dir      build files in \"dir\" (default: ${BUILDFOLDER})"
 
 while getopts ':chopvd:' OPTION; do
-	case "$OPTION" in
-	    c)  echo "-c set: Cleaning up everything in the end"
-	        CLEANUP=true
-	        ;;
-		d)	echo "-d set: Using folder $OPTARG"
-		    BUILDFOLDER="$OPTARG"
-		    ;;
-    	h) 	echo "$USAGE"
-       		exit
-       		;;
+    case "$OPTION" in
+        c)  echo "-c set: Cleaning up everything in the end"
+            CLEANUP=true
+            ;;
+        d)  echo "-d set: Using folder $OPTARG"
+            BUILDFOLDER="$OPTARG"
+            ;;
+        h)  echo "$USAGE"
+            exit
+            ;;
         o)  echo "-o set: Adding users \"${OPTARG}\" to dialout"
             DIALOUT_USERS="$OPTARG"
             ;;
         p)  echo "-o set: Copying version file to desktop of \"${OPTARG}\""
             VERSION_FILE_USERS="$OPTARG"
             ;;
-       	v)  echo "-v set: Being verbose"
-       	    VERBOSE=true
-       	    ;;
-		:) 	echo -e "${RED}ERROR: missing argument for -${OPTARG}\n${NC}" >&2
-		   	echo "$USAGE" >&2
-		   	exit 1
-		   	;;
-	   \?) 	echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
-		   	echo "$USAGE" >&2
-		   	exit 1
-		   	;;
-	esac
+        v)  echo "-v set: Being verbose"
+            VERBOSE=true
+            ;;
+        :)  echo -e "${RED}ERROR: missing argument for -${OPTARG}\n${NC}" >&2
+            echo "$USAGE" >&2
+            exit 1
+            ;;
+       \?)  echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
+            echo "$USAGE" >&2
+            exit 1
+            ;;
+    esac
 done
 shift $((OPTIND - 1))
 
@@ -360,7 +360,7 @@ source config.cfg
 # create and cd into buildfolder
 if [ ! -d $BUILDFOLDER ]; then
     echo_verbose "Creating build folder \"${BUILDFOLDER}\""
-	mkdir $BUILDFOLDER
+    mkdir $BUILDFOLDER
 fi
 
 cp -r install_build_essentials.sh $BUILDFOLDER
