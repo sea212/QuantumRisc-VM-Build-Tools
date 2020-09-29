@@ -20,50 +20,50 @@ CLEANUP=false
 USAGE="$(basename "$0") [-h] [-i] [-c] [-d dir] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory and version, install binaries and cleanup setup files.
 
 where:
-    -h  		show this help text
-    -i  		install binaries
-    -c			cleanup project
-    -d dir 		build files in \"dir\" (default: ${BUILDFOLDER})
-    -t tag		specify version (git tag or commit hash) to pull (default: Latest tag)"
+    -h          show this help text
+    -i          install binaries
+    -c          cleanup project
+    -d dir      build files in \"dir\" (default: ${BUILDFOLDER})
+    -t tag      specify version (git tag or commit hash) to pull (default: Latest tag)"
    
  
 while getopts ":i" OPTION; do
-	case $OPTION in
-		i)	INSTALL=true
-		   	echo "-i set: Installing built binaries"
-		   	;;
-	esac
+    case $OPTION in
+        i)  INSTALL=true
+            echo "-i set: Installing built binaries"
+            ;;
+    esac
 done
 
 OPTIND=1
 
 while getopts ':hicd:t:' OPTION; do
-	case "$OPTION" in
-    	h) 	echo "$USAGE"
-       		exit
-       		;;
-		c) 	if [ $INSTALL = false ]; then
-				>&2 echo -e "${RED}ERROR: -c only makes sense if the built binaries were installed before (-i)"
-				exit 1
-			fi
-			CLEANUP=true
-		   	echo "-c set: Removing build directory"
-		   	;;
-		d)	echo "-d set: Using folder $OPTARG"
-			BUILDFOLDER="$OPTARG"
-			;;
-		t)	echo "-t set: Using version $OPTARG"
-			TAG="$OPTARG"
-			;;
-		:) 	echo -e "${RED}ERROR: missing argument for -${OPTARG}\n${NC}" >&2
-		   	echo "$USAGE" >&2
-		   	exit 1
-		   	;;
-	   \?) 	echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
-		   	echo "$USAGE" >&2
-		   	exit 1
-		   	;;
-	esac
+    case "$OPTION" in
+        h)  echo "$USAGE"
+            exit
+            ;;
+        c)  if [ $INSTALL = false ]; then
+                >&2 echo -e "${RED}ERROR: -c only makes sense if the built binaries were installed before (-i)"
+                exit 1
+            fi
+            CLEANUP=true
+            echo "-c set: Removing build directory"
+            ;;
+        d)  echo "-d set: Using folder $OPTARG"
+            BUILDFOLDER="$OPTARG"
+            ;;
+        t)  echo "-t set: Using version $OPTARG"
+            TAG="$OPTARG"
+            ;;
+        :)  echo -e "${RED}ERROR: missing argument for -${OPTARG}\n${NC}" >&2
+            echo "$USAGE" >&2
+            exit 1
+            ;;
+       \?)  echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
+            echo "$USAGE" >&2
+            exit 1
+            ;;
+    esac
 done
 shift $((OPTIND - 1))
 
@@ -82,7 +82,7 @@ trap 'echo -e "${RED}ERROR: Script was terminated unexpectedly, cleaning up file
 
 # fetch specified version 
 if [ ! -d $BUILDFOLDER ]; then
-	mkdir $BUILDFOLDER
+    mkdir $BUILDFOLDER
 fi
 
 pushd $BUILDFOLDER > /dev/null
@@ -93,33 +93,32 @@ fi
 
 pushd $PROJ > /dev/null
 
-if [ "$TAG" = "latest" ]; then
-	TAGLIST=`git rev-list --tags --max-count=1`
-	
-	# tags found?
-	if [ -n "$TAGLIST" ]; then
-	    COMMIT_HASH="`git describe --tags $TAGLIST`"
-		git checkout "$COMMIT_HASH"
-	else
-	    COMMIT_HASH="$(git rev-parse HEAD)"
-		>&2 echo -e "${RED}WARNING: No git tags found, using master branch${NC}"
-	fi
+if [ "$TAG" == "stable" ]; then
+    TAGLIST=`git rev-list --tags --max-count=1`
+    
+    # tags found?
+    if [ -n "$TAGLIST" ]; then
+        COMMIT_HASH="`git describe --tags $TAGLIST`"
+        git checkout "$COMMIT_HASH"
+    else
+        COMMIT_HASH="$(git rev-parse HEAD)"
+        >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
+    fi
 else
-	git checkout $TAG
-	
-	if [ "$TAG" == "master" ] || [ "${TAG::7}" = "develop" ]; then
-	    COMMIT_HASH="$(git rev-parse HEAD)"
-	else
-	    COMMIT_HASH="$TAG"
-	fi
+    if [ "$TAG" == "default" ] || [ "$TAG" == "latest" ]; then
+        COMMIT_HASH="$(git rev-parse HEAD)"
+    else
+        git checkout $TAG
+        COMMIT_HASH="$TAG"
+    fi
 fi
 
 # build and install if wanted
 # unset var
 if [ -n "$BASH" ]; then
-	unset VERILATOR_ROOT
+    unset VERILATOR_ROOT
 else
-	unsetenv VERILATOR_ROOT
+    unsetenv VERILATOR_ROOT
 fi
 
 autoconf
@@ -127,7 +126,7 @@ autoconf
 make -j$(nproc)
 
 if [ $INSTALL = true ]; then
-	make install
+    make install
 fi
 
 # return to first folder and store version
@@ -136,6 +135,6 @@ echo "Verilator: $COMMIT_HASH" >> "$VERSIONFILE"
 
 # cleanup if wanted
 if [ $CLEANUP = true ]; then
-	rm -rf $BUILDFOLDER
+    rm -rf $BUILDFOLDER
 fi
 

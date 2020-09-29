@@ -39,50 +39,50 @@ RISCV_NEWLIB=default
 # Taken from Sifive:
 # https://github.com/sifive/freedom-tools/blob/120fa4d48815fc9e87c59374c499849934f2ce10/Makefile
 NEWLIB_MULTILIBS_GEN="\
-	rv32e-ilp32e--c \
-	rv32ea-ilp32e--m \
-	rv32em-ilp32e--c \
-	rv32eac-ilp32e-- \
-	rv32emac-ilp32e-- \
-	rv32i-ilp32--c,f,fc,fd,fdc \
-	rv32ia-ilp32-rv32ima,rv32iaf,rv32imaf,rv32iafd,rv32imafd- \
-	rv32im-ilp32--c,f,fc,fd,fdc \
-	rv32iac-ilp32--f,fd \
-	rv32imac-ilp32-rv32imafc,rv32imafdc- \
-	rv32if-ilp32f--c,d,dc \
-	rv32iaf-ilp32f--c,d,dc \
-	rv32imf-ilp32f--d \
-	rv32imaf-ilp32f-rv32imafd- \
-	rv32imfc-ilp32f--d \
-	rv32imafc-ilp32f-rv32imafdc- \
-	rv32ifd-ilp32d--c \
-	rv32imfd-ilp32d--c \
-	rv32iafd-ilp32d-rv32imafd,rv32iafdc- \
-	rv32imafdc-ilp32d-- \
-	rv64i-lp64--c,f,fc,fd,fdc \
-	rv64ia-lp64-rv64ima,rv64iaf,rv64imaf,rv64iafd,rv64imafd- \
-	rv64im-lp64--c,f,fc,fd,fdc \
-	rv64iac-lp64--f,fd \
-	rv64imac-lp64-rv64imafc,rv64imafdc- \
-	rv64if-lp64f--c,d,dc \
-	rv64iaf-lp64f--c,d,dc \
-	rv64imf-lp64f--d \
-	rv64imaf-lp64f-rv64imafd- \
-	rv64imfc-lp64f--d \
-	rv64imafc-lp64f-rv64imafdc- \
-	rv64ifd-lp64d--c \
-	rv64imfd-lp64d--c \
-	rv64iafd-lp64d-rv64imafd,rv64iafdc- \
-	rv64imafdc-lp64d--"
+    rv32e-ilp32e--c \
+    rv32ea-ilp32e--m \
+    rv32em-ilp32e--c \
+    rv32eac-ilp32e-- \
+    rv32emac-ilp32e-- \
+    rv32i-ilp32--c,f,fc,fd,fdc \
+    rv32ia-ilp32-rv32ima,rv32iaf,rv32imaf,rv32iafd,rv32imafd- \
+    rv32im-ilp32--c,f,fc,fd,fdc \
+    rv32iac-ilp32--f,fd \
+    rv32imac-ilp32-rv32imafc,rv32imafdc- \
+    rv32if-ilp32f--c,d,dc \
+    rv32iaf-ilp32f--c,d,dc \
+    rv32imf-ilp32f--d \
+    rv32imaf-ilp32f-rv32imafd- \
+    rv32imfc-ilp32f--d \
+    rv32imafc-ilp32f-rv32imafdc- \
+    rv32ifd-ilp32d--c \
+    rv32imfd-ilp32d--c \
+    rv32iafd-ilp32d-rv32imafd,rv32iafdc- \
+    rv32imafdc-ilp32d-- \
+    rv64i-lp64--c,f,fc,fd,fdc \
+    rv64ia-lp64-rv64ima,rv64iaf,rv64imaf,rv64iafd,rv64imafd- \
+    rv64im-lp64--c,f,fc,fd,fdc \
+    rv64iac-lp64--f,fd \
+    rv64imac-lp64-rv64imafc,rv64imafdc- \
+    rv64if-lp64f--c,d,dc \
+    rv64iaf-lp64f--c,d,dc \
+    rv64imf-lp64f--d \
+    rv64imaf-lp64f-rv64imafd- \
+    rv64imfc-lp64f--d \
+    rv64imafc-lp64f-rv64imafdc- \
+    rv64ifd-lp64d--c \
+    rv64imfd-lp64d--c \
+    rv64iafd-lp64d-rv64imafd,rv64iafdc- \
+    rv64imafdc-lp64d--"
 
 
 # Linux install (cross-compile for linux)
 # Default value from riscv-gcc repository
 GLIBC_MULTILIBS_GEN="\
-	rv32imac-ilp32-rv32ima,rv32imaf,rv32imafd,rv32imafc,rv32imafdc- \
-	rv32imafdc-ilp32d-rv32imafd- \
-	rv64imac-lp64-rv64ima,rv64imaf,rv64imafd,rv64imafc,rv64imafdc- \
-	rv64imafdc-lp64d-rv64imafd-"'
+    rv32imac-ilp32-rv32ima,rv32imaf,rv32imafd,rv32imafc,rv32imafdc- \
+    rv32imafdc-ilp32d-rv32imafd- \
+    rv64imac-lp64-rv64ima,rv64imaf,rv64imafd,rv64imafc,rv64imafdc- \
+    rv64imafdc-lp64d-rv64imafd-"'
 
 
 # parse arguments
@@ -99,50 +99,50 @@ where:
     -p path     choose install path (default: /opt/riscv)"
 
 while getopts ':hcend:t:u:p:' OPTION; do
-	case "$OPTION" in
-    	h) 	echo "$USAGE"
-       		exit
-       		;;
-		c) 	if [ $INSTALL = false ]; then
-				>&2 echo -e "${RED}ERROR: -c only makes sense if the built binaries were installed before (-i)"
-				exit 1
-			fi
-			CLEANUP=true
-		   	echo "-c set: Removing build directory"
-		   	;;
-		e)  EXPORTPATH=true
-		    echo "-e set: Extending PATH by RiscV binary path"
-		    ;;
-    	n) 	echo "-n set: Using newlib cross-compiler"
-       		NEWLIB=true
-       		TOOLCHAIN_SUFFIX="newlib-multilib"
-       		;;
-		d)	echo "-d set: Using folder $OPTARG"
-			BUILDFOLDER="$OPTARG"
-			;;
-		t)	echo "-t set: Using version $OPTARG"
-			TAG="$OPTARG"
-			;;
-		p)	echo "-p set: Using install path $OPTARG"
-			INSTALL_PATH="$OPTARG"
-			;;
-		u)  echo "-u set: Installing for user $OPTARG"
-		    PROFILE_PATH="$(grep $OPTARG /etc/passwd | cut -d ":" -f6)/.profile"
-		    
-		    if [ ! -f "$PROFILE_PATH" ]; then
-		        echo -e "${RED}ERROR: No .profile file found for user \"${OPTARG}\"${NC}" >&2
-		        exit 1;
-		    fi
-		    ;;
-		:) 	echo -e "${RED}ERROR: missing argument for -${OPTARG}\n${NC}" >&2
-		   	echo "$USAGE" >&2
-		   	exit 1
-		   	;;
-	   \?) 	echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
-		   	echo "$USAGE" >&2
-		   	exit 1
-		   	;;
-	esac
+    case "$OPTION" in
+        h)  echo "$USAGE"
+            exit
+            ;;
+        c)  if [ $INSTALL = false ]; then
+                >&2 echo -e "${RED}ERROR: -c only makes sense if the built binaries were installed before (-i)"
+                exit 1
+            fi
+            CLEANUP=true
+            echo "-c set: Removing build directory"
+            ;;
+        e)  EXPORTPATH=true
+            echo "-e set: Extending PATH by RiscV binary path"
+            ;;
+        n)  echo "-n set: Using newlib cross-compiler"
+            NEWLIB=true
+            TOOLCHAIN_SUFFIX="newlib-multilib"
+            ;;
+        d)  echo "-d set: Using folder $OPTARG"
+            BUILDFOLDER="$OPTARG"
+            ;;
+        t)  echo "-t set: Using version $OPTARG"
+            TAG="$OPTARG"
+            ;;
+        p)  echo "-p set: Using install path $OPTARG"
+            INSTALL_PATH="$OPTARG"
+            ;;
+        u)  echo "-u set: Installing for user $OPTARG"
+            PROFILE_PATH="$(grep $OPTARG /etc/passwd | cut -d ":" -f6)/.profile"
+            
+            if [ ! -f "$PROFILE_PATH" ]; then
+                echo -e "${RED}ERROR: No .profile file found for user \"${OPTARG}\"${NC}" >&2
+                exit 1;
+            fi
+            ;;
+        :)  echo -e "${RED}ERROR: missing argument for -${OPTARG}\n${NC}" >&2
+            echo "$USAGE" >&2
+            exit 1
+            ;;
+       \?)  echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
+            echo "$USAGE" >&2
+            exit 1
+            ;;
+    esac
 done
 shift $((OPTIND - 1))
 
@@ -171,7 +171,7 @@ CFG_LOCATION=`pwd -P`
 
 # fetch specified version 
 if [ ! -d $BUILDFOLDER ]; then
-	mkdir $BUILDFOLDER
+    mkdir $BUILDFOLDER
 fi
 
 pushd $BUILDFOLDER > /dev/null
@@ -260,6 +260,6 @@ echo "$VERSIONLIST" >> "$VERSIONFILE"
 
 # cleanup if wanted
 if [ $CLEANUP = true ]; then
-	rm -rf $BUILDFOLDER
+    rm -rf $BUILDFOLDER
 fi
 

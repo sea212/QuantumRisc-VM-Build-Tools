@@ -67,9 +67,14 @@ The *-c*, *-d*, *-i* and *-t* options are default options that available for eve
 
 The script creates a build folder, in which the source code for the project is being pulled into and in which temporary files might be stored. The name of the build folder can be specified by using the *-d* flag.
 
-The source code version that should be pulled can be specified by using the *-t* flag. You can specify a branch name, tag or commit hash. If this parameter is not specified, the default behavior is to scan the repository for the latest tag and pull the state associated with that tag. There are exceptions though. Some repositories abandoned the behavioral pattern of assigning tags to certain releases. If the default behavior would be to pull the latest tag, an obsolescent version of the source code would be used. Therefore, the scripts either have a hard-coded version check (if tag greater than x.y) or they just pull the master branch.
+The source code version that should be pulled can be specified by using the *-t* flag. You can specify a branch name, tag, commit hash or one of the following options:
 
-The tools only build the scripts by default. To also install them (using the default path specified in the tool itself), execute the script with the *-i* flag. There is currently no way to specify the installation path by using the scripts supplied with this project. A workaround would be to set environment variables used by the tools own build scripts.
+- default/latest: Pulls the default branch
+- stable: Pulls the latest tag
+
+The default behaviour (in case *-t* was not specified) is to pull the default branch. Before using the *stable* option, be sure to check whether the repository stopped to use tags at some point in time. If this is the case, the script will pull and use an outdated version, because it does not check timestamps. If no tags are found, the default branch is used.
+
+The scripts only build the tools by default. To also install them (using the default path specified in the tool itself), execute the script with the *-i* flag. There is currently no way to specify the installation path by using the scripts supplied with this project. A workaround would be to set environment variables used by the tools own build scripts.
 
 The last default flag is the *-c* flag, which deletes all files after the tool has been successfully installed. It is only relevant if the *-i* flag is supplied at the same invocation. Otherwise a tool that was build but not installed would be removed, which is obviously pointless because it is equivalent to no changes at all.
 
