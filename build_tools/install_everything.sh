@@ -84,6 +84,46 @@ function exec_verbose {
     fi
 }
 
+# This function does checkout the correct version and return the commit hash or tag name
+# Parameter 1: Branch name, commit hash, tag or one of the special keywords default/latest/stable
+# Parameter 2: Return variable name (commit hash or tag name)
+function select_and_get_project_version {
+    # Stable selected: Choose latest tag if available, otherwise use default branch
+    if [ "$1" == "stable" ]; then
+        local L_TAGLIST=`git rev-list --tags --max-count=1`
+        
+        # tags found?
+        if [ -n "$L_TAGLIST" ]; then
+            local L_COMMIT_HASH="`git describe --tags $L_TAGLIST`"
+            git checkout --recurse-submodules "$L_COMMIT_HASH"
+        else
+            git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+            >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
+        fi
+    else
+        # Either checkout defaut/stable branch or use custom commit hash, tag or branch name
+        if [ "$1" == "default" ] || [ "$1" == "latest" ]; then
+            git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+        else
+            # Check if $1 contains a valid tag and use it as the version if it does
+            git checkout --recurse-submodules "$1"
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+            
+            for CUR_TAG in `git tag --list`; do
+                if [ "$CUR_TAG" == "$1" ]; then
+                    L_COMMIT_HASH="$1"
+                    break
+                fi
+            done
+        fi
+    fi
+    
+    # Apply return value
+    eval "$2=\"$L_COMMIT_HASH\""
+}
+
 # Read latest executed tool/project/etc.
 # Parameter $1: tool/project/etc. list
 # Parameter $2: success file
@@ -278,7 +318,7 @@ function install_project {
     
     if [ "$L_TAG" != "default" ]; then
         pushd $L_NAME_LOWER > /dev/null
-        exec_verbose "git checkout --recurse-submodules ""$L_TAG""" "$ERROR_FILE"
+        exec_verbose "select_and_get_project_version ""$L_TAG"" ""L_COMMIT_HASH""" "$ERROR_FILE"
         popd > /dev/null
     fi
     
@@ -331,6 +371,10 @@ function find_script {
 # Parameter $1: Version file path
 # Parameter $2: User list
 function copy_version_file {
+    if [ ! -f "$1" ]; then
+        return
+    fi
+    
     for L_USER in "$2"; do
         local L_VERSION_USER_DESKTOP="$(getent passwd "$L_USER" | cut -d: -f6)/Desktop"
         
@@ -407,9 +451,14 @@ for PROJECT in $PROJECTS; do
         echo "$PROJECT" > $SUCCESS_FILE_PROJECTS
     fi
 done
+
 # secure version file before it gets deleted (-c)
 pushd -0 > /dev/null
-cp "${BUILDFOLDER}/${VERSIONFILE}" .
+
+if [ -f "${BUILDFOLDER}/${VERSIONFILE}" ]; then
+    cp "${BUILDFOLDER}/${VERSIONFILE}" .
+fi
+
 # add users to dialout
 if [ "$DIALOUT_USERS" == "default" ]; then
     for DIALOUT_USER in `who | cut -d: -f1`; do

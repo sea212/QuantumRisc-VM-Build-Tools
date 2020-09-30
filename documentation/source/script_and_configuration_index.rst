@@ -135,14 +135,6 @@ install_riscv.sh
     :linenos:
 
 
-.. _script-riscv_tools-tempchgs.sh:
-
-tempchgs.sh
-^^^^^^^^^^^
-.. literalinclude:: ../../build_tools/riscv_tools/tempchgs.sh
-    :linenos:
-
-
 .. _script-riscv_tools-install_riscv_essentials.sh:
 
 install_riscv_essentials.sh
