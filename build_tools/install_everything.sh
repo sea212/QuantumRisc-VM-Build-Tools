@@ -170,7 +170,6 @@ function get_latest {
 # Process riscv_gnu_toolchain script parameters
 # Parameter $1: Script name
 # Parameter $2: Variable to store the parameters in
-# Returns parameter string in variable SCRIPT_PARAMETERS
 function parameters_tool_riscv {
     # set -n flag
     if [ "${1:6}" == "NEWLIB" ]; then
@@ -200,7 +199,6 @@ function parameters_tool_riscv {
 # Process nextpnr script parameters
 # Parameter $1: Script name
 # Parameter $2: Variable to store the parameters in
-# Returns parameter string in variable SCRIPT_PARAMETERS
 function parameters_tool_nextpnr {
     # set -e flag
     if [ "${1:8}" == "ECP5" ]; then
@@ -217,7 +215,6 @@ function parameters_tool_nextpnr {
 # Process common script parameters
 # Parameter $1: Script name
 # Parameter $2: Variable to store the parameters in
-# Returns parameter string in variable SCRIPT_PARAMETERS
 function parameters_tool {
     # Set "i" parameter
     if [ "$(eval "echo $`echo $1`_INSTALL")" = true ]; then
@@ -243,7 +240,7 @@ function parameters_tool {
         eval "$2=\"${!2} -t \"$L_BUILD_TAG\"\""
     fi
     
-    # Set "c" for Yosys only
+    # Set "b" for Yosys only
     if [ $1 == "YOSYS" ]; then
         local L_BUILD_COMPILER="$(eval "echo $`echo $1`_COMPILER")"
         
@@ -410,6 +407,7 @@ fi
 cp -r install_build_essentials.sh $BUILDFOLDER
 pushd $BUILDFOLDER > /dev/null
 ERROR_FILE="$(pwd -P)/errors.log"
+
 # Potentially create and empty errors.log file
 echo '' > errors.log
 echo "Executing: ./install_build_essentials.sh"

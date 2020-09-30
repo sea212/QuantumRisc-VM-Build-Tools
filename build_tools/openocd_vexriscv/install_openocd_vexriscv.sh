@@ -137,7 +137,7 @@ fi
 pushd $BUILDFOLDER > /dev/null
 
 if [ ! -d "$PROJ" ]; then
-    git clone --recursive $REPO $PROJ
+    git clone --recursive "$REPO" "${PROJ%%/*}"
 fi
 
 pushd $PROJ > /dev/null

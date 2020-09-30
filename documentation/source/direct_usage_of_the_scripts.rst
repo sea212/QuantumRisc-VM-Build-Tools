@@ -1,3 +1,5 @@
+.. highlight:: sh
+
 Tool build- and install scripts
 ===============================
 
@@ -102,8 +104,6 @@ The script depends on a configuration file, which specifies which tools and proj
 Tool configuration
 ~~~~~~~~~~~~~~~~~~
 .. code-block::
-    :linenos:
-    :lineno-start: 130
     
     ## Verilator
     # Build and (if desired) install Verilator?
@@ -128,8 +128,6 @@ Project configuration
 Beside configuration entries for tools, projects can also be configured. The configuration is identical for every project and looks like this:
 
 .. code-block::
-    :linenos:
-    :lineno-start: 202
     
     ## Pqvexriscv project
     # Download git repostiory
