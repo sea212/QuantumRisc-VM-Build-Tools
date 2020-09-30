@@ -50,4 +50,4 @@ Finally, clean up traces you left during the setup:
 
 - browser history
 - temporary files which are not required anymore
-- command line history by using the command ``history -c -w``
+- command line history by using the command ``history -c && history -w``

@@ -36,7 +36,9 @@ while getopts ':hi:cd:t:' OPTION; do
     case $OPTION in
         i)  INSTALL=true
             # Adjust configure string
-            INSTALL_PREFIX="${CONFIGURE_STRING//"/usr/local"/"$OPTARG"}"
+            if [ "$OPTARG" != 'default' ]; then
+                CONFIGURE_STRING="${CONFIGURE_STRING//"/usr/local"/"$OPTARG"}"
+            fi
             # INSTALL_PREFIX="$OPTARG"
             echo "-i set: Installing built binaries to $OPTARG"
             ;;
@@ -137,19 +139,14 @@ fi
 pushd $BUILDFOLDER > /dev/null
 
 if [ ! -d "$PROJ" ]; then
-    git clone --recursive $REPO $PROJ
+    git clone --recursive "$REPO" "${PROJ%%/*}"
 fi
 
 pushd $PROJ > /dev/null
 select_and_get_project_version "$TAG" "COMMIT_HASH"
 # build and install if wanted
 ./bootstrap
-
-if [ "$INSTALL_PREFIX" == "default" ]; then
-    ./configure $CONFIGURE_STRING
-else
-    ./configure $INSTALL_PREFIX
-fi
+./configure $CONFIGURE_STRING
   
 make -j$(nproc)
 
