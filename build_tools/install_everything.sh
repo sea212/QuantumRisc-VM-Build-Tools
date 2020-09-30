@@ -181,7 +181,7 @@ function parameters_tool_nextpnr {
 function parameters_tool {
     # Set "i" parameter
     if [ "$(eval "echo $`echo $1`_INSTALL")" = true ]; then
-        eval "$2=\"${!2} -i\""
+        eval "$2=\"${!2} -i $(eval "echo $`echo $1`_INSTALL_PATH")\""
     fi
     
     # Set "c" parameter
@@ -270,7 +270,7 @@ function install_project {
     
     # Clone
     if [ ! -d "$L_NAME_LOWER" ]; then
-        exec_verbose "git clone ""$(eval "echo $`echo $1`_URL")"" ""$L_NAME_LOWER""" "$ERROR_FILE"
+        exec_verbose "git clone --recurse-submodules ""$(eval "echo $`echo $1`_URL")"" ""$L_NAME_LOWER""" "$ERROR_FILE"
     fi
     
     # Checkout specified version
@@ -278,7 +278,7 @@ function install_project {
     
     if [ "$L_TAG" != "default" ]; then
         pushd $L_NAME_LOWER > /dev/null
-        exec_verbose "git checkout ""$L_TAG""" "$ERROR_FILE"
+        exec_verbose "git checkout --recurse-submodules ""$L_TAG""" "$ERROR_FILE"
         popd > /dev/null
     fi
     

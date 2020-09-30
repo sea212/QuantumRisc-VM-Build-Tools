@@ -13,6 +13,7 @@ BUILDFOLDER="build_and_install_openocd_vexriscv"
 VERSIONFILE="installed_version.txt"
 TAG="latest"
 INSTALL=false
+INSTALL_PREFIX="default"
 CLEANUP=false
 
 CONFIGURE_STRING="--prefix=/usr/local --program-suffix=-vexriscv 
@@ -21,27 +22,30 @@ CONFIGURE_STRING="--prefix=/usr/local --program-suffix=-vexriscv
 
 
 # parse arguments
-USAGE="$(basename "$0") [-h] [-i] [-c] [-d dir] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory and version, install binaries and cleanup setup files.
+USAGE="$(basename "$0") [-h] [-c] [-d dir] [-i path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory and version, install binaries and cleanup setup files.
 
 where:
     -h          show this help text
-    -i          install binaries
     -c          cleanup project
     -d dir      build files in \"dir\" (default: ${BUILDFOLDER})
+    -i path     install binaries to path (use \"default\" to use default path)
     -t tag      specify version (git tag or commit hash) to pull (default: Latest tag)"
    
  
-while getopts ":i" OPTION; do
+while getopts ':hi:cd:t:' OPTION; do
     case $OPTION in
         i)  INSTALL=true
-            echo "-i set: Installing built binaries"
+            # Adjust configure string
+            INSTALL_PREFIX="${CONFIGURE_STRING//"/usr/local"/"$OPTARG"}"
+            # INSTALL_PREFIX="$OPTARG"
+            echo "-i set: Installing built binaries to $OPTARG"
             ;;
     esac
 done
 
 OPTIND=1
 
-while getopts ':hicd:t:' OPTION; do
+while getopts ':hi:cd:t:' OPTION; do
     case "$OPTION" in
         h)  echo "$USAGE"
             exit
@@ -63,13 +67,14 @@ while getopts ':hicd:t:' OPTION; do
             echo "$USAGE" >&2
             exit 1
             ;;
-       \?)  echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
+        \?) echo -e "${RED}ERROR: illegal option: -${OPTARG}\n${NC}" >&2
             echo "$USAGE" >&2
             exit 1
             ;;
     esac
 done
-shift $((OPTIND - 1))
+
+shift "$((OPTIND - 1))"
 
 # exit when any command fails
 set -e
@@ -103,7 +108,7 @@ if [ "$TAG" == "stable" ]; then
     # tags found?
     if [ -n "$TAGLIST" ]; then
         COMMIT_HASH="`git describe --tags $TAGLIST`"
-        git checkout "$COMMIT_HASH"
+        git checkout --recurse-submodules "$COMMIT_HASH"
     else
         COMMIT_HASH="$(git rev-parse HEAD)"
         >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
@@ -112,14 +117,19 @@ else
     if [ "$TAG" == "default" ] || [ "$TAG" == "latest" ]; then
         COMMIT_HASH="$(git rev-parse HEAD)"
     else
-        git checkout $TAG
+        git checkout --recurse-submodules $TAG
         COMMIT_HASH="$TAG"
     fi
 fi
 
 # build and install if wanted
 ./bootstrap
-./configure $CONFIGURE_STRING
+
+if [ "$INSTALL_PREFIX" == "default" ]; then
+    ./configure $CONFIGURE_STRING
+else
+    ./configure $INSTALL_PREFIX
+fi
   
 make -j$(nproc)
 
@@ -135,4 +145,5 @@ echo "OpenOCD-Vexriscv: $COMMIT_HASH" >> "$VERSIONFILE"
 if [ $CLEANUP = true ]; then
     rm -rf $BUILDFOLDER
 fi
+
 

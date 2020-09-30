@@ -14,32 +14,34 @@ VERSIONFILE="installed_version.txt"
 COMPILER="clang"
 TAG="latest"
 INSTALL=false
+INSTALL_PREFIX="default"
 CLEANUP=false
 
 
 # parse arguments
-USAGE="$(basename "$0") [-h] [-i] [-c] [-d dir] [-b buildtool] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select compiler (buildtool), build directory and version, install binaries and cleanup setup files.
+USAGE="$(basename "$0") [-h] [-c] [-d dir] [-b buildtool] [-i path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select compiler (buildtool), build directory and version, install binaries and cleanup setup files.
 
 where:
     -h          show this help text
-    -i          install binaries
     -c          cleanup project
     -d dir      build files in \"dir\" (default: ${BUILDFOLDER})
+    -i path     install binaries to path (use \"default\" to use default path)
     -b compiler specify compiler (default: ${COMPILER}, alternative: gcc)
     -t tag      specify version (git tag or commit hash) to pull (default: default branch)"
    
- 
-while getopts ":i" OPTION; do
+
+while getopts ':hi:cd:b:t:' OPTION; do
     case $OPTION in
         i)  INSTALL=true
-            echo "-i set: Installing built binaries"
+            INSTALL_PREFIX="$OPTARG"
+            echo "-i set: Installing built binaries to $INSTALL_PREFIX"
             ;;
     esac
 done
 
 OPTIND=1
 
-while getopts ':hicd:b:t:' OPTION; do
+while getopts ':hi:cd:b:t:' OPTION; do
     case "$OPTION" in
         h)  echo "$USAGE"
             exit
@@ -70,7 +72,8 @@ while getopts ':hicd:b:t:' OPTION; do
             ;;
     esac
 done
-shift $((OPTIND - 1))
+
+shift "$((OPTIND - 1))"
 
 # exit when any command fails
 set -e
@@ -123,7 +126,11 @@ make config-$COMPILER
 make -j$(nproc)
 
 if [ $INSTALL = true ]; then
-    make install
+    if [ "$INSTALL_PREFIX" == "default" ]; then
+        make install
+    else
+        make install PREFIX="$INSTALL_PREFIX"
+    fi
 fi
 
 # return to first folder and store version

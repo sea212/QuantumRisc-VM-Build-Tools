@@ -199,7 +199,7 @@ while read LINE; do
             if [ "${!SUBREPO}" != "default" ]; then
                 if [ -d "$SUBREPO_LOWER" ]; then
                     pushd $SUBREPO_LOWER > /dev/null
-                    git checkout ${!SUBREPO}
+                    git checkout --recurse-submodules ${!SUBREPO}
                     VERSIONLIST="${VERSIONLIST}\n${SUBREPO_LOWER}-${TOOLCHAIN_SUFFIX}: ${!SUBREPO}"
                     popd > /dev/null
                 fi
