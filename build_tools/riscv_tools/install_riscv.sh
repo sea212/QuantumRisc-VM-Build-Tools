@@ -12,8 +12,7 @@ PROJ="riscv-gnu-toolchain"
 BUILDFOLDER="build_and_install_riscv_gnu_toolchain"
 VERSIONFILE="installed_version.txt"
 TOOLCHAIN_SUFFIX="linux-multilib"
-TAG="master"
-DEFAULTTAG="master"
+TAG="latest"
 NEWLIB=false
 # INSTALL=false
 INSTALL_PATH="/opt/riscv"
@@ -146,6 +145,46 @@ while getopts ':hcend:t:u:p:' OPTION; do
 done
 shift $((OPTIND - 1))
 
+# This function does checkout the correct version and return the commit hash or tag name
+# Parameter 1: Branch name, commit hash, tag or one of the special keywords default/latest/stable
+# Parameter 2: Return variable name (commit hash or tag name)
+function select_and_get_project_version {
+    # Stable selected: Choose latest tag if available, otherwise use default branch
+    if [ "$1" == "stable" ]; then
+        local L_TAGLIST=`git rev-list --tags --max-count=1`
+        
+        # tags found?
+        if [ -n "$L_TAGLIST" ]; then
+            local L_COMMIT_HASH="`git describe --tags $L_TAGLIST`"
+            git checkout --recurse-submodules "$L_COMMIT_HASH"
+        else
+            git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+            >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
+        fi
+    else
+        # Either checkout defaut/stable branch or use custom commit hash, tag or branch name
+        if [ "$1" == "default" ] || [ "$1" == "latest" ]; then
+            git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+        else
+            # Check if $1 contains a valid tag and use it as the version if it does
+            git checkout --recurse-submodules "$1"
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+            
+            for CUR_TAG in `git tag --list`; do
+                if [ "$CUR_TAG" == "$1" ]; then
+                    L_COMMIT_HASH="$1"
+                    break
+                fi
+            done
+        fi
+    fi
+    
+    # Apply return value
+    eval "$2=\"$L_COMMIT_HASH\""
+}
+
 # exit when any command fails
 set -e
 
@@ -168,7 +207,6 @@ fi
 source "$VERSION_FILE_NAME"
 CFG_LOCATION=`pwd -P`
 
-
 # fetch specified version 
 if [ ! -d $BUILDFOLDER ]; then
     mkdir $BUILDFOLDER
@@ -181,13 +219,8 @@ if [ ! -d "$PROJ" ]; then
 fi
 
 pushd $PROJ > /dev/null
-git checkout --recurse-submodules -f $TAG
-
-if [ "$TAG" == "$DEFAULTTAG" ]; then
-    VERSIONLIST="RiscV-GNU-Toolchain-${TOOLCHAIN_SUFFIX}: $(git rev-parse HEAD)"
-else
-    VERSIONLIST="RiscV-GNU-Toolchain-${TOOLCHAIN_SUFFIX}: $TAG"
-fi
+select_and_get_project_version "$TAG" "COMMIT_HASH"
+VERSIONLIST="RiscV-GNU-Toolchain-${TOOLCHAIN_SUFFIX}: $COMMIT_HASH"
 
 # fetch versions for all subrepos (as specified in versions.cfg)
 while read LINE; do

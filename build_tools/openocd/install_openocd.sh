@@ -70,6 +70,46 @@ done
 
 shift "$((OPTIND - 1))"
 
+# This function does checkout the correct version and return the commit hash or tag name
+# Parameter 1: Branch name, commit hash, tag or one of the special keywords default/latest/stable
+# Parameter 2: Return variable name (commit hash or tag name)
+function select_and_get_project_version {
+    # Stable selected: Choose latest tag if available, otherwise use default branch
+    if [ "$1" == "stable" ]; then
+        local L_TAGLIST=`git rev-list --tags --max-count=1`
+        
+        # tags found?
+        if [ -n "$L_TAGLIST" ] && [ "$L_TAGLIST" != "v0.10.0" ]; then
+            local L_COMMIT_HASH="`git describe --tags $L_TAGLIST`"
+            git checkout --recurse-submodules "$L_COMMIT_HASH"
+        else
+            git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+            >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
+        fi
+    else
+        # Either checkout defaut/stable branch or use custom commit hash, tag or branch name
+        if [ "$1" == "default" ] || [ "$1" == "latest" ]; then
+            git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+        else
+            # Check if $1 contains a valid tag and use it as the version if it does
+            git checkout --recurse-submodules "$1"
+            local L_COMMIT_HASH="$(git rev-parse HEAD)"
+            
+            for CUR_TAG in `git tag --list`; do
+                if [ "$CUR_TAG" == "$1" ]; then
+                    L_COMMIT_HASH="$1"
+                    break
+                fi
+            done
+        fi
+    fi
+    
+    # Apply return value
+    eval "$2=\"$L_COMMIT_HASH\""
+}
+
 # exit when any command fails
 set -e
 
@@ -96,31 +136,7 @@ fi
 
 pushd $PROJ > /dev/null
 
-if [ "$TAG" == "stable" ]; then
-    TAGLIST=`git rev-list --tags --max-count=1`
-    COMMIT_HASH="$(git rev-parse HEAD)"
-    
-    # tags found?
-    if [ -n "$TAGLIST" ]; then
-        LATEST_TAG=`git describe --tags $TAGLIST`
-        
-        # this tag won't compile because the compiler updated and a warning
-        # is now regarded as an error -Werror
-        if [ "$LATEST_TAG" != "v0.10.0" ]; then
-            git checkout --recurse-submodules $LATEST_TAG
-            COMMIT_HASH="$LATEST_TAG"
-        fi
-    else
-        >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
-    fi
-else
-    if [ "$TAG" == "default" ] || [ "$TAG" == "latest" ]; then
-        COMMIT_HASH="$(git rev-parse HEAD)"
-    else
-        git checkout --recurse-submodules $TAG
-        COMMIT_HASH="$TAG"
-    fi
-fi
+select_and_get_project_version "$TAG" "COMMIT_HASH"
 
 # build and install if wanted
 ./bootstrap
