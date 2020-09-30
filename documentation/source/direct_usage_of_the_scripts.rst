@@ -129,22 +129,22 @@ Beside configuration entries for tools, projects can also be configured. The con
 
 .. code-block::
     :linenos:
-    :lineno-start: 182
+    :lineno-start: 202
     
     ## Pqvexriscv project
     # Download git repostiory
     PQRISCV_VEXRISCV=true
     # Git URL
-    PQRISCV_VEXRISCV_URL="https://github.com/mupq/pqriscv-vexriscv"
-    # Specify git branch or commit hash to pull (default = default branch)
+    PQRISCV_VEXRISCV_URL="https://github.com/mupq/pqriscv-vexriscv.git"
+    # Specify project version to pull (default/latest, stable, tag, branch, hash)
     PQRISCV_VEXRISCV_TAG=default
     # Space seperated list of users (in quotation marks) to install the project for
-    # /home/$user/Documents and link to desktop. default = all logged in users
+    # in /home/$user/Documents. default = all logged in users
     PQRISCV_VEXRISCV_USER=default
     # Symbolic link to /home/$user/Desktop
     PQRISCV_VEXRISCV_LINK_TO_DESKTOP=true
     
-The configuration parameter names for projects follow the name conception *PROJECT_PARAMETER=VALUE*. You can toggle whether you'd like the project to be installed by specifying ``PROJECT=true``. Currently the projects are limited to projects that can be pulled by using git. The git repository url can be specified as an HTTP-link in the ``PROJECT_URL=HTTPURL`` parameter. The state of the git repository that should be used is reflected in the ``PROJECT_TAG=STATE`` parameter. *STATE* can either be a branch name, a tag or a commit hash.
+The configuration parameter names for projects follow the name conception *PROJECT_PARAMETER=VALUE*. You can toggle whether you'd like the project to be installed by specifying ``PROJECT=true``. Currently the projects are limited to projects that can be pulled by using git. The git repository url can be specified as an HTTP-link in the ``PROJECT_URL=HTTPURL`` parameter. The state of the git repository that should be used is reflected in the ``PROJECT_TAG=STATE`` parameter. *STATE* can take the same values as the *-t* flag from the :ref:`Tool build and install script parameters <tool-build-and-install-scripts-parameters>`.
 
 
 .. _fully-automated-script-usage:
