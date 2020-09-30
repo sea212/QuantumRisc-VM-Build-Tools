@@ -64,7 +64,7 @@ This prints the following output (for verilator)::
 
 .. _tool-build-and-install-scripts-parameters:
 
-The *-c*, *-d*, *-i* and *-t* options are default options that available for every tool build and install script.
+The *-c*, *-d*, *-i* and *-t* options are default options that are available for every tool build and install script.
 
 The script creates a build folder, in which the source code for the project is being pulled into and in which temporary files might be stored. The name of the build folder can be specified by using the *-d* flag.
 
