@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Author: Harald Heckmann <mail@haraldheckmann.de>
-# Date: Jun. 23 2020
+# Date: Jun. 25 2020
 # Project: QuantumRisc (RheinMain University) <Steffen.Reith@hs-rm.de>
 
 # require sudo
@@ -15,12 +15,9 @@ fi
 set -e
 
 # required tools
-TOOLS="build-essential git clang gcc meson ninja-build g++ python3-dev \
-       openjdk-8-jdk scala sbt make"
+TOOLS="libgtk-3-dev libvte-2.91-dev intltool libgudev-1.0 meson ninja-build"
 
 # install and upgrade tools
-echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
 apt-get update
 apt-get install -y $TOOLS
 apt-get install --only-upgrade -y $TOOLS
