@@ -161,7 +161,7 @@ fi
 
 # return to first folder and store version
 pushd -0 > /dev/null
-echo "Verilator: $COMMIT_HASH" >> "$VERSIONFILE"
+echo "${PROJ##*/}: $COMMIT_HASH" >> "$VERSIONFILE"
 
 # cleanup if wanted
 if [ $CLEANUP = true ]; then

@@ -154,7 +154,7 @@ fi
 
 # return to first folder and store version
 pushd -0 > /dev/null
-echo "Ujprog: $COMMIT_HASH" >> "$VERSIONFILE"
+echo "${PROJ##*/}: $COMMIT_HASH" >> "$VERSIONFILE"
 
 # cleanup if wanted
 if [ $CLEANUP = true ]; then

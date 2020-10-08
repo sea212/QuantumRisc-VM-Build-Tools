@@ -8,7 +8,7 @@
 RED='\033[1;31m'
 NC='\033[0m'
 REPO="https://github.com/SpinalHDL/openocd_riscv.git"
-PROJ="openocd_riscv"
+PROJ="openocd_vexriscv"
 BUILDFOLDER="build_and_install_openocd_vexriscv"
 VERSIONFILE="installed_version.txt"
 TAG="latest"
@@ -138,7 +138,7 @@ fi
 
 pushd $BUILDFOLDER > /dev/null
 
-if [ ! -d "$PROJ" ]; then
+if [ ! -d "${PROJ%%/*}" ]; then
     git clone --recursive "$REPO" "${PROJ%%/*}"
 fi
 
@@ -156,7 +156,7 @@ fi
 
 # return to first folder and store version
 pushd -0 > /dev/null
-echo "OpenOCD-Vexriscv: $COMMIT_HASH" >> "$VERSIONFILE"
+echo "${PROJ##*/}: $COMMIT_HASH" >> "$VERSIONFILE"
 
 # cleanup if wanted
 if [ $CLEANUP = true ]; then

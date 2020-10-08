@@ -246,9 +246,9 @@ fi
 pushd -0 > /dev/null
 
 if [ "$CHIP" == "ice40" ]; then
-    echo "Nextpnr-ice40: $COMMIT_HASH" >> "$VERSIONFILE"
+    echo "${PROJ##*/}-ice40: $COMMIT_HASH" >> "$VERSIONFILE"
 else
-    echo "Nextpnr-ecp5: $COMMIT_HASH" >> "$VERSIONFILE"
+    echo "${PROJ##*/}-ecp5: $COMMIT_HASH" >> "$VERSIONFILE"
 fi
 
 # cleanup if wanted
