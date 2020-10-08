@@ -289,7 +289,7 @@ fi
 
 # return to first folder and store version
 pushd -0 > /dev/null
-echo "$VERSIONLIST" >> "$VERSIONFILE"
+echo -e "$VERSIONLIST" >> "$VERSIONFILE"
 
 # cleanup if wanted
 if [ $CLEANUP = true ]; then
