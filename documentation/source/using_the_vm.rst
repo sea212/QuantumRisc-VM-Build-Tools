@@ -11,7 +11,7 @@ Prerequisites
 
 * `QuantumRisc-VM <https://random-oracles.org/risc-v/>`__
 * `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`__ (tested with version 6.1.10_Ubuntu r138449)
-* >70GB hard disk space
+* >80GB hard disk space
 
 
 Setup
@@ -65,14 +65,16 @@ Next select the "Display" category and specify the video memory. To avoid graphi
 
 .. image:: pictures/using_the_vm/setting_up_vm/configure_video_memory.png
 
-Complete the configuration by making sure that USB connections are passed through to your VM. This is only relevant if you want to work with devices connected over USB, for example to flash a FPGA. If it is required, you can also connect virtual devices to real serial ports in the VM settings.
+Complete the configuration by making sure that USB connections are passed through to your VM. This is only relevant if you want to work with devices connected over USB, for example to flash a FPGA. You have to pass through each USB device or create a filter that matches a group of devices. To permanently pass through an USB device, select the USB icon that contains a green *+* sign on it in the USB dialog:
 
-.. image:: pictures/using_the_vm/setting_up_vm/configure_usb.png
+.. image:: pictures/using_the_vm/setting_up_vm/configure_usb_add_device.png
+
+Hint: You can also add and remove permissions to pass through your USB devices during the execution of the VM. To do so, click on *Devices -> USB* in the menu of the running VM.
 
 
 Usage
 -----
-After setting VirtualBox and the QuantumRisc-VM up, the VM is ready to use. Start the VM, the superuser credentials can be found at the QuantumRisc-VM download page. You might want to change the display resolution. This can be achieved by clicking on "Activities" in the top left corner, typing "displays" and pressing enter. You can switch between fullscreen and scaled mode by pressing hostkey + F and hostkey + S respectively. By default, the hostkey is mapped to right CTRL. If you experience graphical issues, switching to scaled mode (hostkey + S) and configuring the displays within the VM might resolve the issues.
+After setting VirtualBox and the QuantumRisc-VM up, the VM is ready to use. Start the VM, the superuser credentials can be found at the QuantumRisc-VM download page. If you can only see a black screen, press *right CTRL + F* twice. You might want to change the display resolution. This can be achieved by clicking on "Activities" in the top left corner, typing "displays" and pressing enter. You can switch between fullscreen and scaled mode by pressing hostkey + F and hostkey + S respectively. By default, the hostkey is mapped to right CTRL. If you experience graphical issues, switching to scaled mode (hostkey + S) and configuring the displays within the VM might resolve the issues.
 
 After launching the VM you see the desktop containing a version file and symbolic links to folders:
 
