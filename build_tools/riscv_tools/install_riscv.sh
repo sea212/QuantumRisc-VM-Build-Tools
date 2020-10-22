@@ -228,6 +228,48 @@ while read LINE; do
 done < "${CFG_LOCATION}/${VERSION_FILE_NAME}"
 
 
+# build and install if wanted
+PATH="${INSTALL_PATH}:${PATH}"
+
+if [ $NEWLIB = true ]; then
+    ./configure --prefix=$INSTALL_PATH --enable-multilib --disable-linux
+    # activate custom multilibs
+    pushd "riscv-gcc/gcc/config/riscv" > /dev/null
+    chmod +x ./multilib-generator
+    ./multilib-generator $NEWLIB_MULTILIBS_GEN > t-elf-multilib
+    popd > /dev/null
+    NEWLIB_MULTILIB_NAMES=`echo $NEWLIB_MULTILIBS_GEN | sed "s/-\(rv\(32\|64\)[a-zA-Z]*,*\)*-\([a-zA-Z]*,*\)*//g"`
+    echo "Building newlib-multilib for \"$NEWLIB_MULTILIB_NAMES\""
+    # build
+    make -j$(nproc) NEWLIB_MULTILIB_NAMES="$NEWLIB_MULTILIB_NAMES"
+else
+    ./configure --prefix=$INSTALL_PATH --enable-multilib --enable-linux
+    # activate custom multilibs
+    pushd "riscv-gcc/gcc/config/riscv" > /dev/null
+    chmod +x ./multilib-generator
+    ./multilib-generator $GLIBC_MULTILIBS_GEN > t-linux-multilib
+    popd > /dev/null
+    GLIBC_MULTILIB_NAMES=`echo $GLIBC_MULTILIBS_GEN | sed "s/-\(rv\(32\|64\)[a-zA-Z]*,*\)*-\([a-zA-Z]*,*\)*//g"`
+    echo "Building linux-multilib for \"$GLIBC_MULTILIB_NAMES\""
+    # build
+    make -j$(nproc) GLIBC_MULTILIB_NAMES="$GLIBC_MULTILIB_NAMES" linux
+fi
+
+# extend path
+if [ $EXPORTPATH = true ]; then
+    PATH_STRING="\n# Add RiscV tools to path
+if [ -d \"${INSTALL_PATH}/bin\" ]; then
+  PATH=\"${INSTALL_PATH}/bin:\$PATH\"
+fi"
+
+    if ! grep -q "PATH=\"${INSTALL_PATH}/bin:\$PATH\"" "$PROFILE_PATH"; then
+        echo -e "$PATH_STRING" >> "$PROFILE_PATH"
+    fi
+    
+    source $PROFILE_PATH
+fi
+
+# return to first folder and store version
 pushd -0 > /dev/null
 echo -e "$VERSIONLIST" >> "$VERSIONFILE"
 
