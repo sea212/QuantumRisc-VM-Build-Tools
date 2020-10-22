@@ -283,8 +283,10 @@ if [ -d \"${INSTALL_PATH}/bin\" ]; then
 fi"
 
     if ! grep -q "PATH=\"${INSTALL_PATH}/bin:\$PATH\"" "$PROFILE_PATH"; then
-      echo -e "$PATH_STRING" >> "$PROFILE_PATH"
+        echo -e "$PATH_STRING" >> "$PROFILE_PATH"
     fi
+    
+    source $PROFILE_PATH
 fi
 
 # return to first folder and store version
