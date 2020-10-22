@@ -115,6 +115,8 @@ else
     select_and_get_project_version "$TAG" "COMMIT_HASH"
 fi
 
+echo "selected TAG: $COMMIT_HASH"
+
 # build and install if wanted
 ./bootstrap
 

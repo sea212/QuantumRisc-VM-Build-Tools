@@ -192,68 +192,42 @@ while read LINE; do
         SUBREPO=`echo "$LINE" | sed "s/[=].*$//"`
         if [ -n "${!SUBREPO}" ]; then
             SUBREPO_LOWER=`echo "$SUBREPO" | tr [A-Z,_] [a-z,-]`
-            
-            if [ "${!SUBREPO}" != "default" ]; then
-                if [ -d "$SUBREPO_LOWER" ]; then
-                    pushd $SUBREPO_LOWER > /dev/null
+            if [ -d "$SUBREPO_LOWER" ]; then
+                pushd $SUBREPO_LOWER > /dev/null
+                
+                if [ "${!SUBREPO}" != "default" ]; then
                     git checkout --recurse-submodules ${!SUBREPO}
-                    VERSIONLIST="${VERSIONLIST}\n${SUBREPO_LOWER}-${TOOLCHAIN_SUFFIX}: ${!SUBREPO}"
-                    popd > /dev/null
                 fi
-            else
-                if [ -d "$SUBREPO_LOWER" ]; then
-                    pushd $SUBREPO_LOWER > /dev/null
-                    VERSIONLIST="${VERSIONLIST}\n${SUBREPO_LOWER}-${TOOLCHAIN_SUFFIX}: $(git rev-parse HEAD)"
-                    popd > /dev/null
+                
+                SUBREPO_COMMIT_HASH="$(git rev-parse HEAD)"
+                         
+                # set return value to tag name if available
+                # we have to cheat here: Since riscv-collaborators used branch names instead
+                # of tag names (why?!), we have to check both and hack the version a bit to
+                # indicate that.
+                POSSIBLE_TAGS=`git tag --points-at $SUBREPO_COMMIT_HASH`
+                
+                if [ -n "$POSSIBLE_TAGS" ]; then
+                    SUBREPO_COMMIT_HASH="${POSSIBLE_TAGS%%[$'\n']*}"
+                else
+                    # check branches
+                    POSSIBLE_BRANCHES=`git branch -r --points-at $SUBREPO_COMMIT_HASH`
+                    if [ -n "$POSSIBLE_BRANCHES" ]; then
+                        ONE_BRANCH="${POSSIBLE_BRANCHES%%[$'\n']*}"
+                        # this is hacky. Extracts the number and anything after the number
+                        # matching the the pattern d.d, where d is an arbitrary long number
+                        SUBREPO_COMMIT_HASH="$(echo "$ONE_BRANCH" | grep -Po '\d+\.\d+.*') (${SUBREPO_COMMIT_HASH})"
+                    fi
                 fi
+                
+                popd > /dev/null
+                VERSIONLIST="${VERSIONLIST}\n${SUBREPO_LOWER}-${TOOLCHAIN_SUFFIX}: ${SUBREPO_COMMIT_HASH}"
             fi
         fi
     fi
 done < "${CFG_LOCATION}/${VERSION_FILE_NAME}"
 
 
-# build and install if wanted
-PATH="${INSTALL_PATH}:${PATH}"
-
-if [ $NEWLIB = true ]; then
-    ./configure --prefix=$INSTALL_PATH --enable-multilib --disable-linux
-    # activate custom multilibs
-    pushd "riscv-gcc/gcc/config/riscv" > /dev/null
-    chmod +x ./multilib-generator
-    ./multilib-generator $NEWLIB_MULTILIBS_GEN > t-elf-multilib
-    popd > /dev/null
-    NEWLIB_MULTILIB_NAMES=`echo $NEWLIB_MULTILIBS_GEN | sed "s/-\(rv\(32\|64\)[a-zA-Z]*,*\)*-\([a-zA-Z]*,*\)*//g"`
-    echo "Building newlib-multilib for \"$NEWLIB_MULTILIB_NAMES\""
-    # build
-    make -j$(nproc) NEWLIB_MULTILIB_NAMES="$NEWLIB_MULTILIB_NAMES"
-else
-    ./configure --prefix=$INSTALL_PATH --enable-multilib --enable-linux
-    # activate custom multilibs
-    pushd "riscv-gcc/gcc/config/riscv" > /dev/null
-    chmod +x ./multilib-generator
-    ./multilib-generator $GLIBC_MULTILIBS_GEN > t-linux-multilib
-    popd > /dev/null
-    GLIBC_MULTILIB_NAMES=`echo $GLIBC_MULTILIBS_GEN | sed "s/-\(rv\(32\|64\)[a-zA-Z]*,*\)*-\([a-zA-Z]*,*\)*//g"`
-    echo "Building linux-multilib for \"$GLIBC_MULTILIB_NAMES\""
-    # build
-    make -j$(nproc) GLIBC_MULTILIB_NAMES="$GLIBC_MULTILIB_NAMES" linux
-fi
-
-# extend path
-if [ $EXPORTPATH = true ]; then
-    PATH_STRING="\n# Add RiscV tools to path
-if [ -d \"${INSTALL_PATH}/bin\" ]; then
-  PATH=\"${INSTALL_PATH}/bin:\$PATH\"
-fi"
-
-    if ! grep -q "PATH=\"${INSTALL_PATH}/bin:\$PATH\"" "$PROFILE_PATH"; then
-        echo -e "$PATH_STRING" >> "$PROFILE_PATH"
-    fi
-    
-    source $PROFILE_PATH
-fi
-
-# return to first folder and store version
 pushd -0 > /dev/null
 echo -e "$VERSIONLIST" >> "$VERSIONFILE"
 

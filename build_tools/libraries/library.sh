@@ -6,7 +6,6 @@
 
 # This file contains functions that are shared by the build and install scripts.
 
-
 # This function does checkout the correct version and return the commit hash or tag name
 # Parameter 1: Branch name, commit hash, tag or one of the special keywords default/latest/stable
 # Parameter 2: Return variable name (commit hash or tag name)
@@ -19,28 +18,29 @@ function select_and_get_project_version {
         if [ -n "$L_TAGLIST" ]; then
             local L_COMMIT_HASH="`git describe --tags $L_TAGLIST`"
             git checkout --recurse-submodules "$L_COMMIT_HASH"
+            return 0
         else
             git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
             local L_COMMIT_HASH="$(git rev-parse HEAD)"
             >&2 echo -e "${RED}WARNING: No git tags found, using default branch${NC}"
         fi
     else
-        # Either checkout defaut/stable branch or use custom commit hash, tag or branch name
+        # Either checkout default/stable branch or use custom commit hash, tag or branch name
         if [ "$1" == "default" ] || [ "$1" == "latest" ]; then
             git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-            local L_COMMIT_HASH="$(git rev-parse HEAD)"
         else
             # Check if $1 contains a valid tag and use it as the version if it does
             git checkout --recurse-submodules "$1"
-            local L_COMMIT_HASH="$(git rev-parse HEAD)"
-            
-            for CUR_TAG in `git tag --list`; do
-                if [ "$CUR_TAG" == "$1" ]; then
-                    L_COMMIT_HASH="$1"
-                    break
-                fi
-            done
         fi
+        
+        local L_COMMIT_HASH="$(git rev-parse HEAD)"
+    fi
+    
+    # Set return value to tag name if available
+    local L_POSSIBLE_TAGS=`git tag --points-at $L_COMMIT_HASH`
+    
+    if [ -n "$L_POSSIBLE_TAGS" ]; then
+        L_COMMIT_HASH="${L_POSSIBLE_TAGS%%[$'\n']*}"
     fi
     
     # Apply return value
