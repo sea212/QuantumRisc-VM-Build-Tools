@@ -130,19 +130,23 @@ Beside configuration entries for tools, projects can also be configured. The con
 .. code-block::
     
     ## Pqvexriscv project
-    # Download git repostiory
-    PQRISCV_VEXRISCV=true
+    # Download git repository
+    PQRISCV_VEXRISCV=false
     # Git URL
     PQRISCV_VEXRISCV_URL="https://github.com/mupq/pqriscv-vexriscv.git"
     # Specify project version to pull (default/latest, stable, tag, branch, hash)
     PQRISCV_VEXRISCV_TAG=default
-    # Space seperated list of users (in quotation marks) to install the project for
-    # in /home/$user/Documents. default = all logged in users
+    # If default is selected, the project is stored in the documents folder
+    # of each user listed in the variable PQRISCV_VEXRISCV_USER
+    PQRISCV_VEXRISCV_LOCATION=default
+    # Space separated list of users (in quotation marks) to install the project for
+    # in /home/$user/Documents (if PQRISCV_VEXRISCV_LOCATION=default). 
+    # default = all logged in users. Linking to desktop is also based on this list.
     PQRISCV_VEXRISCV_USER=default
     # Symbolic link to /home/$user/Desktop
     PQRISCV_VEXRISCV_LINK_TO_DESKTOP=true
     
-The configuration parameter names for projects follow the name conception *PROJECT_PARAMETER=VALUE*. You can toggle whether you'd like the project to be installed by specifying ``PROJECT=true``. Currently the projects are limited to projects that can be pulled by using git. The git repository url can be specified as an HTTP-link in the ``PROJECT_URL=HTTPURL`` parameter. The state of the git repository that should be used is reflected in the ``PROJECT_TAG=STATE`` parameter. *STATE* can take the same values as the *-t* flag from the :ref:`Tool build and install script parameters <tool-build-and-install-scripts-parameters>`.
+The configuration parameter names for projects follow the name conception *PROJECT_PARAMETER=VALUE*. You can toggle whether you'd like the project to be installed by specifying ``PROJECT=true``. Currently the projects are limited to projects that can be pulled by using git. The git repository url can be specified as an HTTP-link in the ``PROJECT_URL=HTTPURL`` parameter. The state of the git repository that should be used is reflected in the ``PROJECT_TAG=STATE`` parameter. *STATE* can take the same values as the *-t* flag from the :ref:`Tool build and install script parameters <tool-build-and-install-scripts-parameters>`. By specifying ``PROJECT_LOCATION=PATH`` you can control where the project is copied to. Leaving this value at *default* does use the documents folder inside the home directory of the user specified in the variable ``PROJECT_USER=USER``. If *PROJECT_USER* is default, any logged on user will be regarded. Finally, it is possible to configure whether the project is linked to the desktop of the user by specifying ``PROJECT_LINK_TO_DESKTOP=BOOL``.
 
 
 .. _fully-automated-script-usage:

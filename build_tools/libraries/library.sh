@@ -6,6 +6,10 @@
 
 # This file contains functions that are shared by the build and install scripts.
 
+# constants
+RED='\033[1;31m'
+NC='\033[0m'
+
 # This function does checkout the correct version and return the commit hash or tag name
 # Parameter 1: Branch name, commit hash, tag or one of the special keywords default/latest/stable
 # Parameter 2: Return variable name (commit hash or tag name)
@@ -202,38 +206,53 @@ function parameters_tool {
 # Parameter $1: Project name
 # Parameter $2: User name
 # Parameter $3: Create symbolic link (bool)
+# Parameter $4: Project directory (where to copy it)
 function install_project_for_user {
-    # Get user and home directory
     local L_USER_HOME=$(getent passwd "$2" | cut -d: -f6)
     
-    # User not found
-    if [ -z "$L_USER_HOME" ]; then
-        echo -e "${RED}ERROR: User ${L_USER} does not exist (home directory not found).${NC}"
-        exit 1;
+    # User not found (link to desktop impossible)
+    if [ $3 = true ] || [ "$4" == "default" ]; then
+        if [ -z "$L_USER_HOME" ]; then
+            echo -e "${RED}ERROR: User ${L_USER} does not exist (home directory not found).${NC}"
+            exit 1;
+        fi
     fi
     
     # Lookup Documents and Desktop and create if not existant
-    local L_USER_DOCUMENTS="${L_USER_HOME}/Documents"
-    local L_USER_DESKTOP="${L_USER_HOME}/Desktop"
-    
-    # TODO: Improve for multiple languages (currently only en support)
-    if [ ! -d "${L_USER_DOCUMENTS}" ]; then
-        mkdir $L_USER_DOCUMENTS
-        chown -R ${L_USER}:$L_USER $L_USER_DOCUMENTS
+    if [ "$4" == "default" ]; then
+        local L_DESTINATION="${L_USER_HOME}/Documents"
+    else
+        # Strip last possible "/" path
+        if [ "${4: -1}" == "/" ]; then
+            local L_DESTINATION="${4:: -1}"
+        else
+            local L_DESTINATION="$4"
+        fi
     fi
     
-    if [ ! -d "${L_USER_DESKTOP}" ]; then
-        mkdir $L_USER_DESKTOP
-        chown -R ${L_USER}:$L_USER $L_USER_DESKTOP
+    local L_PROJECT="$1"
+    local L_USER="$2"
+    
+    # TODO: Improve for multiple languages (Documents / Desktop only in en)
+    if [ ! -d "${L_DESTINATION}" ]; then
+        mkdir "$L_DESTINATION"
+        chown -R "${L_USER}:${L_USER}" "$L_DESTINATION"
     fi
     
-    # Copy project to Documents
-    cp -r "$1" "$L_USER_DOCUMENTS"
-    chown -R ${L_USER}:$L_USER "${L_USER_DOCUMENTS}/$1"
+    # Copy project
+    cp -r "$L_PROJECT" "$L_DESTINATION"
+    chown -R "${L_USER}:${L_USER}" "${L_DESTINATION}/${L_PROJECT}"
     
-    # Create symbolic link if desired
-    if [ "$3" = true ]; then
-        ln -s "${L_USER_DOCUMENTS}/$1" "${L_USER_DESKTOP}/$1"
+    # Create symbolic link to desktop if desired
+    if [ $3 = true ]; then
+        local L_USER_DESKTOP="${L_USER_HOME}/Desktop"
+        
+        if [ ! -d "${L_USER_DESKTOP}" ]; then
+            mkdir "$L_USER_DESKTOP"
+            chown -R "${L_USER}:${L_USER}" "$L_USER_DESKTOP"
+        fi
+        
+        ln -s "${L_DESTINATION}/${L_PROJECT}" "${L_USER_DESKTOP}/${L_PROJECT}"
     fi
 }
 
@@ -261,17 +280,18 @@ function install_project {
     fi
     
     local L_LINK="$(eval "echo $`echo $1`_LINK_TO_DESKTOP")"
-    
     # Get users to install the projects for
     local L_USERLIST="$(eval "echo $`echo $1`_USER")"
+    # Get project install location
+    local L_INST_LOC="$(eval "echo $`echo $1`_LOCATION")"
     
     if [ "$L_USERLIST" == "default" ]; then
-        for L_USER in `who | cut -d: -f1`; do
-            install_project_for_user "$L_NAME_LOWER" "$L_USER" $L_LINK
+        for L_USER in `who | cut -d' ' -f1`; do
+            install_project_for_user "$L_NAME_LOWER" "$L_USER" $L_LINK "$L_INST_LOC"
         done
     else
         for L_USER in "$L_USERLIST"; do
-            install_project_for_user "$L_NAME_LOWER" "$L_USER" $L_LINK
+            install_project_for_user "$L_NAME_LOWER" "$L_USER" $L_LINK "$L_INST_LOC"
         done
     fi
     
