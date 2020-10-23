@@ -18,7 +18,8 @@ VERSION_FILE_USERS=default
 CLEANUP=false
 VERBOSE=false
 SCRIPTS="YOSYS TRELLIS ICESTORM NEXTPNR_ICE40 NEXTPNR_ECP5 UJPROG OPENOCD \
-OPENOCD_VEXRISCV VERILATOR GTKTERM GTKWAVE RISCV_NEWLIB RISCV_LINUX FUJPROG"
+OPENOCD_VEXRISCV VERILATOR GTKTERM GTKWAVE RISCV_NEWLIB RISCV_LINUX FUJPROG \
+SPINALHDL"
 PROJECTS="PQRISCV_VEXRISCV DEMO_PROJECT_ICE40"
 
 
@@ -115,12 +116,24 @@ for SCRIPT in $SCRIPTS; do
         COMMAND_INSTALL_ESSENTIALS=""
         COMMAND_INSTALL=""
         find_script "$SCRIPT" "COMMAND_INSTALL_ESSENTIALS" "COMMAND_INSTALL"
-        COMMAND_INSTALL="${COMMAND_INSTALL} $PARAMETERS"
-        echo "Executing: $COMMAND_INSTALL_ESSENTIALS"
-        exec_verbose "$COMMAND_INSTALL_ESSENTIALS" "$ERROR_FILE"
-        echo "Executing: $COMMAND_INSTALL"
-        exec_verbose "$COMMAND_INSTALL" "$ERROR_FILE"
-        echo "$SCRIPT" > $SUCCESS_FILE_TOOLS
+        
+        # Execute any file that is available
+        # build essentials
+        if [ -f "$COMMAND_INSTALL_ESSENTIALS" ]; then
+            echo "Executing: $COMMAND_INSTALL_ESSENTIALS"
+            exec_verbose "$COMMAND_INSTALL_ESSENTIALS" "$ERROR_FILE"
+        else
+            echo -e "Warning: ${COMMAND_INSTALL_ESSENTIALS##*/} not found"
+        fi
+        
+        # tool install script
+        if [ -f "$COMMAND_INSTALL" ]; then
+            echo "Executing: ${COMMAND_INSTALL} ${PARAMETERS}"
+            exec_verbose "${COMMAND_INSTALL} ${PARAMETERS}" "$ERROR_FILE"
+            echo "$SCRIPT" > $SUCCESS_FILE_TOOLS
+        else
+            echo -e "Warning: ${COMMAND_INSTALL##*/} not found"
+        fi
     fi
 done
 
