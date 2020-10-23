@@ -297,11 +297,11 @@ function find_script {
         cp -r ../${L_NAME_LOWER} .
         eval "$2=\"$(pwd -P)/${L_NAME_LOWER}/install_${L_NAME_LOWER}_essentials.sh\""
         eval "$3=\"$(pwd -P)/${L_NAME_LOWER}/install_${L_NAME_LOWER}.sh\""
-        
-        # TODO: Extend to automatically find all configuration files
-        if [ -f "$(pwd -P)/${L_NAME_LOWER}/versions.cfg" ]; then
-            cp "$(pwd -P)/${L_NAME_LOWER}/versions.cfg" .
-        fi
+        local L_CFG_FILES=`find "$(pwd -P)/${L_NAME_LOWER}" -iname "*.cfg"`
+
+        for CFG_FILE in $L_CFG_FILES; do
+            cp "$CFG_FILE" .
+        done
     fi
 }
 
