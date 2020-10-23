@@ -1,20 +1,23 @@
 #!/bin/bash
 
 # Author: Harald Heckmann <mail@haraldheckmann.de>
-# Date: Jun. 24 2020
+# Date: Oct. 23 2020
 # Project: QuantumRisc (RheinMain University) <Steffen.Reith@hs-rm.de>
 
 # constants
 RED='\033[1;31m'
 NC='\033[0m'
 LIBRARY="../libraries/library.sh"
-REPO="https://github.com/cliffordwolf/icestorm.git"
-PROJ="icestorm"
-BUILDFOLDER="build_and_install_icestorm"
+REPO="https://github.com/kost/fujprog.git"
+PROJ="fujprog"
+BUILDFOLDER="build_and_install_fujprog"
 VERSIONFILE="installed_version.txt"
-RULE_FILE="/etc/udev/rules.d/53-lattice-ftdi.rules"
+RULE_FILE="/etc/udev/rules.d/80-fpga-ulx3s.rules"
 # space separate multiple rules
-RULES=('ACTION=="add", ATTR{idVendor}=="0403", ATTR{idProduct}=="6010", MODE:="666"')
+RULES=(
+    'SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", MODE="664", GROUP="dialout"'
+    'ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", GROUP="dialout", MODE="666"'
+)
 TAG="latest"
 INSTALL=false
 INSTALL_PREFIX="default"
@@ -102,21 +105,22 @@ if [ ! -d "$PROJ" ]; then
 fi
 
 pushd $PROJ > /dev/null
-
 select_and_get_project_version "$TAG" "COMMIT_HASH"
 
 # build and install if wanted
+if [ "$INSTALL_PREFIX" == "default" ]; then
+    cmake .
+else
+    cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" .
+fi
+
 make -j$(nproc)
 
 if [ $INSTALL = true ]; then
-    if [ "$INSTALL_PREFIX" == "default" ]; then
-        make install
-    else
-        make install PREFIX="$INSTALL_PREFIX"
-    fi
+    make install
 fi
 
-# allow any user to access ice fpgas (no sudo)
+# allow any user to access ulx3s fpgas (no sudo)
 touch "$RULE_FILE"
 
 for RULE in "${RULES[@]}"; do
