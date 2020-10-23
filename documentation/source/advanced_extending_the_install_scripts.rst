@@ -501,36 +501,45 @@ To add a project to the major install script, two steps are required:
 1. Copy and adapt an existing configuration for a project from :ref:`script-build_tools-config.cfg`
 2. Add the project name to the *PROJECTS* variable in :ref:`script-build_tools-install_everything.sh`
 
-Step 1: Open :ref:`script-build_tools-config.cfg` and duplicate the last project configuration, in this case it is DEMO_PROJECT::
+Step 1: Open :ref:`script-build_tools-config.cfg` and duplicate the last project configuration, in this case it is *DEMO_PROJECT_ICE40*::
 
     ## Hello world demo application
-    # Download git repostiory
-    DEMO_PROJECT=true
+    # Download git repository
+    DEMO_PROJECT_ICE40=false
     # Git URL
-    DEMO_PROJECT_URL="https://github.com/ThorKn/icebreaker-vexriscv-helloworld.git"
+    DEMO_PROJECT_ICE40_URL="https://github.com/ThorKn/icebreaker-vexriscv-helloworld.git"
     # Specify project version to pull (default/latest, stable, tag, branch, hash)
-    DEMO_PROJECT_TAG=default
+    DEMO_PROJECT_ICE40_TAG=default
+    # If default is selected, the project is stored in the documents folder
+    # of each user listed in the variable DEMO_PROJECT_ICE40_USER
+    DEMO_PROJECT_ICE40_LOCATION=default
     # Space seperated list of users (in quotation marks) to install the project for
-    # in /home/$user/Documents. default = all logged in users
-    DEMO_PROJECT_USER=default
+    # in /home/$user/Documents (if DEMO_PROJECT_ICE40_LOCATION=default). 
+    # default = all logged in users. Linking to desktop is also based on this list.
+    DEMO_PROJECT_ICE40_USER=default
     # Symbolic link to /home/$user/Desktop
-    DEMO_PROJECT_LINK_TO_DESKTOP=true
+    DEMO_PROJECT_ICE40_LINK_TO_DESKTOP=true
     
 Replace DEMO_PROJECT with the project you want to add and adjust the configuration values as you desire::
 
-    ## Description
-    # Download git repostiory
-    <YOUR_PROJECT>=true
+    ## Hello world demo application
+    # Download git repository
+    <YOUR_PROJECT>=false
     # Git URL
-    <YOUR_PROJECT>_URL=<YOUR_PROJECT_GIT_HTTPS_URL>
+    <YOUR_PROJECT>_URL="<YOUR_PROJECT_GIT_HTTPS_URL>"
     # Specify project version to pull (default/latest, stable, tag, branch, hash)
     <YOUR_PROJECT>_TAG=default
-    # Space seperated list of users (in quotation marks) to install the project for
-    # in /home/$user/Documents. default = all logged in users
+    # If default is selected, the project is stored in the documents folder
+    # of each user listed in the variable <YOUR_PROJECT>_USER
+    <YOUR_PROJECT>_LOCATION=default
+    # Space separated list of users (in quotation marks) to install the project for
+    # in /home/$user/Documents (if <YOUR_PROJECT>_LOCATION=default). 
+    # default = all logged in users. Linking to desktop is also based on this list.
     <YOUR_PROJECT>_USER=default
     # Symbolic link to /home/$user/Desktop
     <YOUR_PROJECT>_LINK_TO_DESKTOP=true
 
+Double check every configuration parameter, especially the *URL* and if *<YOUR_PROJECT>* is set to *true*.
 
 Step 2: Open :ref:`script-build_tools-install_everything.sh` and look for the definition of the *PROJECTS* variable in the constant/default variable initialization section of the code::
 

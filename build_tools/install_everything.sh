@@ -77,13 +77,12 @@ if [[ $UID != 0 ]]; then
     exit 1
 fi
 
+# load shared functions
+source $LIBRARY
 
 # Read config
 echo_verbose "Loading configuration file"
 source config.cfg
-
-# load shared functions
-source $LIBRARY
 
 # create and cd into buildfolder
 if [ ! -d $BUILDFOLDER ]; then
@@ -146,7 +145,7 @@ fi
 
 # add users to dialout
 if [ "$DIALOUT_USERS" == "default" ]; then
-    for DIALOUT_USER in `who | cut -d: -f1`; do
+    for DIALOUT_USER in `who | cut -d' ' -f1`; do
         usermod -a -G dialout "$DIALOUT_USER"
     done
 else
@@ -157,7 +156,7 @@ fi
 
 # copy version file to users desktop
 if [ "$VERSION_FILE_USERS" == "default" ]; then
-    copy_version_file "$(pwd -P)/${VERSIONFILE}" `who | cut -d: -f1`
+    copy_version_file "$(pwd -P)/${VERSIONFILE}" `who | cut -d' ' -f1`
 else
     copy_version_file "$(pwd -P)/${VERSIONFILE}" "$VERSION_FILE_USERS"
 fi
