@@ -21,10 +21,10 @@ CLEANUP=false
 BUILD_MCODE=false
 BUILD_LLVM=false
 BUILD_GCC=false
-BUILD_GCC_DEFAULT_CONFIG="--enable-languages=c,vhdl --disable-bootstrap \
---disable-lto --disable-multilib --disable-libssp --program-suffix=ghdl"
 DEFAULT_PREFIX='/usr/local'
-
+GHDL_GCC_SUFFIX='-ghdl'
+BUILD_GCC_DEFAULT_CONFIG="--enable-languages=c,vhdl --disable-bootstrap \
+--disable-lto --disable-multilib --disable-libssp --program-suffix=${GHDL_GCC_SUFFIX}"
 
 # parse arguments
 USAGE="$(basename "$0") [-h] [-c] [-m] [-l] [-g] [-d dir] [-i path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory and version, install binaries and cleanup setup files.
