@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Author: Harald Heckmann <mail@haraldheckmann.de>
-# Date: Jun. 23 2020
+# Date: Oct. 23 2020
 # Project: QuantumRisc (RheinMain University) <Steffen.Reith@hs-rm.de>
 
 # require sudo
@@ -15,9 +15,9 @@ fi
 set -e
 
 # required tools
-TOOLS="build-essential git clang gcc meson ninja-build g++ python3-dev \
-       make flex bison libc6 binutils gzip bzip2 tar perl autoconf m4 \
-       automake gettext gperf dejagnu expect tcl"
+TOOLS="build-essential git make gcc gnat llvm clang flex libc6 binutils gzip \
+       bzip2 tar perl autoconf m4 automake gettext gperf dejagnu expect tcl \
+       autogen guile-3.0 ssh texinfo"
 
 # install and upgrade tools
 apt-get update

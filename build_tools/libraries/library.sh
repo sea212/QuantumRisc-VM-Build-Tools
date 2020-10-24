@@ -13,10 +13,15 @@ NC='\033[0m'
 # This function does checkout the correct version and return the commit hash or tag name
 # Parameter 1: Branch name, commit hash, tag or one of the special keywords default/latest/stable
 # Parameter 2: Return variable name (commit hash or tag name)
+# Parameter 3: (OPTIONAL) glob string filter for stable tag list
 function select_and_get_project_version {
     # Stable selected: Choose latest tag if available, otherwise use default branch
     if [ "$1" == "stable" ]; then
-        local L_TAGLIST=`git rev-list --tags --max-count=1`
+        if [ -n "$3" ]; then
+            local L_TAGLIST=`git rev-list --tags="$3" --max-count=1`
+        else
+            local L_TAGLIST=`git rev-list --tags --max-count=1`
+        fi
         
         # tags found?
         if [ -n "$L_TAGLIST" ]; then
@@ -30,7 +35,7 @@ function select_and_get_project_version {
         fi
     else
         # Either checkout default/stable branch or use custom commit hash, tag or branch name
-        if [ "$1" == "default" ] || [ "$1" == "latest" ]; then
+        if [ "$1" == 'default' ] || [ "$1" == 'latest' ]; then
             git checkout --recurse-submodules $(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
         else
             # Check if $1 contains a valid tag and use it as the version if it does
@@ -43,7 +48,7 @@ function select_and_get_project_version {
     # Set return value to tag name if available
     local L_POSSIBLE_TAGS=`git tag --points-at $L_COMMIT_HASH`
     
-    if [ -n "$L_POSSIBLE_TAGS" ]; then
+    if [ -n "$L_POSSIBLE_TAGS" ] && [ "$L_POSSIBLE_TAGS" != "nightly" ]; then
         L_COMMIT_HASH="${L_POSSIBLE_TAGS%%[$'\n']*}"
     fi
     
@@ -157,6 +162,26 @@ function parameters_tool_nextpnr {
     fi
 }
 
+# Process ghdl script parameters
+# Parameter $1: Script name
+# Parameter $2: Variable to store the parameters in
+function parameters_tool_ghdl {
+    # Set "g" flag
+    if [ "$(eval "echo $`echo $1`_GCC")" = true ]; then
+        eval "$2=\"${!2} -g\""
+    fi
+    
+    # Set "l" flag
+    if [ "$(eval "echo $`echo $1`_LLVM")" = true ]; then
+        eval "$2=\"${!2} -l\""
+    fi
+    
+    # Set "m" flag
+    if [ "$(eval "echo $`echo $1`_MCODE")" = true ]; then
+        eval "$2=\"${!2} -m\""
+    fi
+}
+
 # Process common script parameters
 # Parameter $1: Script name
 # Parameter $2: Variable to store the parameters in
@@ -194,11 +219,13 @@ function parameters_tool {
         fi
     fi
     
-    # Append special parameters for gnu-riscv-toolchain and nextpnr variants
+    # Append special parameters
     if [ "${1::5}" == "RISCV" ]; then
         parameters_tool_riscv "$1" "$2"
     elif [ "${1::7}" == "NEXTPNR" ]; then
         parameters_tool_nextpnr "$1" "$2"
+    elif [ "$1" == "GHDL" ]; then
+        parameters_tool_ghdl "$1" "$2"
     fi
 }
 
