@@ -11,13 +11,13 @@ Prerequisites
 
 * `QuantumRisc-VM <https://random-oracles.org/risc-v/>`__
 * `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`__ (tested with version 6.1.10_Ubuntu r138449)
-* >80GB hard disk space
+* ~100GB hard disk space (~80GB VM image, ~20GB archive)
 
 
 Setup
 -----
 
-Download and extract the QuantumRisc-VM from the link mentioned in :ref:`usage-prerequisites`. You can get yourself a coffee or a tee, because the archive is >10GB large and the extraction takes more than half an hour. Also install VirtualBox, following the instructions given at the vendors page.
+Download and extract the QuantumRisc-VM from the link mentioned in :ref:`usage-prerequisites`. You can get yourself a coffee or a tee, because the archive is relatively large and the extraction can take half an hour. Also install VirtualBox, following the instructions given at the vendors page.
 
 
 .. _usage-setting-up-vb:
