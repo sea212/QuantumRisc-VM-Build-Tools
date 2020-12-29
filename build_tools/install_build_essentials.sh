@@ -18,6 +18,25 @@ set -e
 TOOLS="build-essential git clang gcc meson ninja-build g++ python3-dev \
        make flex bison libc6 binutils gzip bzip2 tar perl autoconf m4 \
        automake gettext gperf dejagnu expect tcl"
+REMOVE_HINT_FILE="remove_after_build.txt"
+       
+# check which tools are not installed, so that they can be removed
+# after installation
+NOT_INSTALLED=""
+APTLIST=`apt list --installed`
+
+for TOOL in $TOOLS; do
+    case "$APTLIST" in
+        *"${TOOL}/"*)
+            echo "found $TOOL"
+            continue
+            ;;
+    esac
+    
+    NOT_INSTALLED="${NOT_INSTALLED} $TOOL"
+done
+
+echo -e "$NOT_INSTALLED" >> $REMOVE_HINT_FILE
 
 # install and upgrade tools
 apt-get update
