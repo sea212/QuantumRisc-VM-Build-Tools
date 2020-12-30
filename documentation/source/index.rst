@@ -16,8 +16,8 @@ Welcome to QuantumRisc-VM's documentation!
    creating_a_vm
    advanced_extending_the_install_scripts
    script_and_configuration_index
-   further_references
-   changelog
+..   further_references
+..   changelog
 
 
 

@@ -11,7 +11,7 @@ Prerequisites
 
 * `QuantumRisc-VM <https://random-oracles.org/risc-v/>`__
 * `VirtualBox <https://www.virtualbox.org/wiki/Downloads>`__ (tested with version 6.1.10_Ubuntu r138449)
-* ~100GB hard disk space (~80GB VM image, ~20GB archive)
+* ~27GB hard disk space (~21GB VM image, ~6GB archive)
 
 
 Setup
@@ -82,10 +82,3 @@ After launching the VM you see the desktop containing a version file and symboli
 
 The version file contains a version dump of all the tools that are available on the VM. All these tools are already configured and installed properly and can be used out of the box.
 The symbolic links to folders are links to projects that have been selected to be included into the VM by default. Those are usually projects that are being developed currently or assist during development. One of the default projects is an "Hello World" project, which serves as testkit to automatically test most of the tools that are available on the VM. This project is described in the next section :ref:`usage-hello-world`
-
-
-.. _usage-hello-world:
-
-Hello World
-~~~~~~~~~~~
-A demo application which uses most if not all of the tools on the VM will be included in the next version.
