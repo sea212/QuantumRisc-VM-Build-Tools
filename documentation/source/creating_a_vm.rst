@@ -11,13 +11,13 @@ Prerequisites
 * `Ubuntu 20.04 LTS setup iso <https://releases.ubuntu.com/20.04.1/ubuntu-20.04.1-desktop-amd64.iso>`__
 * `VM build tools <https://github.com/sea212/QuantumRisc-VM-Build-Tools/tree/master/build_tools>`__
 * >6GB RAM
-* >100GB hard disk space (~80GB for the VM, ~20GB to archive it)
+* >85GB hard disk space (~80GB for the VM, ~5GB to archive it)
 
 
 Preparing the VM
 ----------------
 
-Follow the instructions on `how to install Ubuntu 20.04 LTS <https://fossbytes.com/how-to-install-ubuntu-20-04-lts-virtualbox-windows-mac-linux/>`__, but instead of allocating 30GB of disk space, choose at least 85GB (100GB recommended). You can set the username and password both to "quantumrisc". After the successful installation of Ubuntu and all tools and projects, about 76 GB are used up. In case you selected 85GB, about 9GB are still available for the end user to download and install additional software. During the installation of the tools and projects, the disk will use up to almost 80 GB temporarily.
+Follow the instructions on `how to install Ubuntu 20.04 LTS <https://fossbytes.com/how-to-install-ubuntu-20-04-lts-virtualbox-windows-mac-linux/>`__, but instead of allocating 30GB of disk space, choose at least 85GB (100GB recommended). You can set the username and password both to "quantumrisc". After the successful installation of Ubuntu and all tools and projects, about 76 GB are used up. During the installation of the tools and projects, the virtual hard drive image will use up to almost 80 GB temporarily. After the VM setup is complete, we will shrink the virtual hard drive image to about 21GB.
 
 After the successful installation of `Ubuntu 20.04 LTS <https://releases.ubuntu.com/20.04.1/ubuntu-20.04.1-desktop-amd64.iso>`__ and the `VirtualBox Guest Additions <https://download.virtualbox.org/virtualbox/>`__ on the VM, shutdown the VM and follow the instructions from section :ref:`usage-setting-up-vm`. In addition to those instructions, you also have to raise the available memory for the VM to at least 6GB. To achieve this, select the VM and enter the *Settings* dialogue:
 
@@ -51,3 +51,7 @@ Finally, clean up traces you left during the setup:
 - browser history
 - temporary files which are not required anymore
 - command line history by using the command ``history -c && history -w``
+
+Shrinking the VM
+----------------
+Files deleted within the VM are not freed from the allocated space of the hard drive file on the host system. This has to be done manually. After the VM was configured completely, follow the tutorial at `howtogeek.com <https://www.howtogeek.com/312883/how-to-shrink-a-virtualbox-virtual-machine-and-free-up-disk-space/>`__ to shrink the VM disk image file. You might find yourself with an error that the Linux partition is still mounted when executing ``zerofree`` as shown in the tutorial. In this case, insert the Ubuntu live CD iso image in the virtual disk like when you installed Ubuntu. After Ubuntu started from the iso image, click on "Try out" in the dialogue. Open a terminal and install zerofree: ``sudo apt-get install zerofree``. Use the fdisk command to find the Linux partition ``sudo fdisk -l``. Finally, use zerofree to zero unused disk space: ``sudo zerofree -v /dev/sd<X><Y>``
