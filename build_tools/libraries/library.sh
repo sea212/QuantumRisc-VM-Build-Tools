@@ -235,19 +235,21 @@ function parameters_tool {
 # Parameter $3: Create symbolic link (bool)
 # Parameter $4: Project directory (where to copy it)
 function install_project_for_user {
-    local L_USER_HOME=$(getent passwd "$2" | cut -d: -f6)
+    xdg-user-dirs-update
+    local L_PROJECT="$1"
+    local L_USER="$2"
     
     # User not found (link to desktop impossible)
     if [ $3 = true ] || [ "$4" == "default" ]; then
-        if [ -z "$L_USER_HOME" ]; then
-            echo -e "${RED}ERROR: User ${L_USER} does not exist (home directory not found).${NC}"
-            exit 1;
+        if ! runuser -l $L_USER -c "xdg-user-dir"; then
+            echo -e "${RED}ERROR: User ${L_USER} does not exist.${NC}"
+            return
         fi
     fi
     
     # Lookup Documents and Desktop and create if not existant
     if [ "$4" == "default" ]; then
-        local L_DESTINATION="${L_USER_HOME}/Documents"
+        local L_DESTINATION=`runuser -l $L_USER -c "xdg-user-dir DOCUMENTS"`
     else
         # Strip last possible "/" path
         if [ "${4: -1}" == "/" ]; then
@@ -256,29 +258,15 @@ function install_project_for_user {
             local L_DESTINATION="$4"
         fi
     fi
-    
-    local L_PROJECT="$1"
-    local L_USER="$2"
-    
-    # TODO: Improve for multiple languages (Documents / Desktop only in en)
-    if [ ! -d "${L_DESTINATION}" ]; then
-        mkdir "$L_DESTINATION"
-        chown -R "${L_USER}:${L_USER}" "$L_DESTINATION"
-    fi
-    
+ 
     # Copy project
+    mkdir -p "$L_DESTINATION"
     cp -r "$L_PROJECT" "$L_DESTINATION"
-    chown -R "${L_USER}:${L_USER}" "${L_DESTINATION}/${L_PROJECT}"
+    chown -R "${L_USER}:${L_USER}" "${L_DESTINATION}"
     
     # Create symbolic link to desktop if desired
-    if [ $3 = true ]; then
-        local L_USER_DESKTOP="${L_USER_HOME}/Desktop"
-        
-        if [ ! -d "${L_USER_DESKTOP}" ]; then
-            mkdir "$L_USER_DESKTOP"
-            chown -R "${L_USER}:${L_USER}" "$L_USER_DESKTOP"
-        fi
-        
+    if $3; then
+        local L_USER_DESKTOP=`runuser -l $L_USER -c "xdg-user-dir DESKTOP"`
         ln -s "${L_DESTINATION}/${L_PROJECT}" "${L_USER_DESKTOP}/${L_PROJECT}"
     fi
 }
@@ -357,17 +345,18 @@ function find_script {
 # Parameter $2: User list
 function copy_version_file {
     if [ ! -f "$1" ]; then
+        echo -e "${RED}ERROR: File ${1} does not exist.${NC}"
         return
     fi
     
-    for L_USER in "$2"; do
-        local L_VERSION_USER_DESKTOP="$(getent passwd "$L_USER" | cut -d: -f6)/Desktop"
+    xdg-user-dirs-update
         
-        # TODO: add multiple language support
-        if [ ! -d "$L_VERSION_USER_DESKTOP" ]; then
-            mkdir "$L_VERSION_USER_DESKTOP"
+    for L_USER in $2; do
+        if ! local L_DESKTOP=`runuser -l $L_USER -c "xdg-user-dir DESKTOP"`; then
+            echo -e "${RED}ERROR: User ${L_USER} does not exist.${NC}"
+            continue
         fi
         
-        cp "$1" "$L_VERSION_USER_DESKTOP"
+        cp "$1" "$L_DESKTOP"
     done
 }

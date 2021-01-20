@@ -17,7 +17,7 @@ set -e
 # required tools
 TOOLS="build-essential git clang gcc meson ninja-build g++ python3-dev \
        make flex bison libc6 binutils gzip bzip2 tar perl autoconf m4 \
-       automake gettext gperf dejagnu expect tcl"
+       automake gettext gperf dejagnu expect tcl xdg-user-dirs"
 
 # install and upgrade tools
 apt-get update
