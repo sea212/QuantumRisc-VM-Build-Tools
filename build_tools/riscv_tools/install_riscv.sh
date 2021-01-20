@@ -20,6 +20,8 @@ INSTALL_PATH="/opt/riscv"
 PROFILE_PATH="/etc/profile"
 CLEANUP=false
 EXPORTPATH=false
+VECTOREXT=false
+VECTORBRANCH='rvv-intrinsic'
 
 VERSION_FILE_NAME="versions.cfg"
 VERSION_FILE='## Define sourcecode branch
@@ -86,19 +88,20 @@ GLIBC_MULTILIBS_GEN="\
 
 
 # parse arguments
-USAGE="$(basename "$0") [-h] [-c] [-n] [-d dir] [-t tag] [-u user] [-p path] -- Clone latested ${PROJ} version and build it. Optionally select compiler (buildtool), build directory and version, install binaries and cleanup setup files.
+USAGE="$(basename "$0") [-h] [-c] [-n] [-d dir] [-t tag] [-p path] [-u user] -- Clone latested ${PROJ} version and build it. Optionally select compiler (buildtool), build directory and version, install binaries and cleanup setup files.
 
 where:
     -h          show this help text
     -c          cleanup project
-    -n          use \"newlib multilib\" instead of \"linux multilib\" cross-compiler
     -e          extend PATH in by RiscV binary path (default: /etc/profile)
+    -n          use \"newlib multilib\" instead of \"linux multilib\" cross-compiler
+    -v          install with experimental vector extensions (uses rvv-intrinsic branch)
     -d dir      build files in \"dir\" (default: ${BUILDFOLDER})
     -t tag      specify version (git tag or commit hash) to pull (default: default branch)
-    -u user     install RiscV tools for user \"user\". (default: install globally)
-    -p path     choose install path (default: /opt/riscv)"
+    -p path     choose install path (default: /opt/riscv)
+    -u user     install RiscV tools for user \"user\". (default: install globally)"
 
-while getopts ':hcend:t:u:p:' OPTION; do
+while getopts ':hcenvd:t:u:p:' OPTION; do
     case "$OPTION" in
         h)  echo "$USAGE"
             exit
@@ -116,6 +119,9 @@ while getopts ':hcend:t:u:p:' OPTION; do
         n)  echo "-n set: Using newlib cross-compiler"
             NEWLIB=true
             TOOLCHAIN_SUFFIX="newlib-multilib"
+            ;;
+        v)  echo "-v set: Installing with experimental vector extensions"
+            VECTOREXT=true
             ;;
         d)  echo "-d set: Using folder $OPTARG"
             BUILDFOLDER="$OPTARG"
@@ -179,11 +185,30 @@ fi
 pushd $BUILDFOLDER > /dev/null
 
 if [ ! -d "$PROJ" ]; then
-    git clone --recursive "$REPO" "${PROJ%%/*}"
+    git clone $([ "$VECTOREXT" = true ] && echo "--branch $VECTORBRANCH" || echo "") --recursive --depth 1 "$REPO" "${PROJ%%/*}"
 fi
 
 pushd $PROJ > /dev/null
-select_and_get_project_version "$TAG" "COMMIT_HASH"
+
+# fetch correct commit
+if [ $VECTOREXT = false ]; then
+    select_and_get_project_version "$TAG" "COMMIT_HASH"
+else
+    if [ "$TAG" != 'latest' ]; then
+        BRANCHES=`git branch --contains "$TAG"` || true
+        
+        if [ 'rvv-intrinsic' == ${BRANCHES:(-13)} ]; then
+            git checkout --recurse-submodules "$TAG"
+            COMMIT_HASH="$TAG"
+        else
+            echo -e "${RED}WARNING: Commit hash \"$TAG\" is either not present in rvv-intrinsic branch or is present in multiple branches. Using latest commit in rvv-intrinsic branch instead.${NC}"
+            sleep 5s
+        fi
+    fi
+    
+    COMMIT_HASH=`git rev-parse HEAD`
+fi
+
 VERSIONLIST="RiscV-GNU-Toolchain-${TOOLCHAIN_SUFFIX}: $COMMIT_HASH"
 
 # fetch versions for all subrepos (as specified in versions.cfg)
