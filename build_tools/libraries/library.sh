@@ -132,7 +132,7 @@ function parameters_tool_riscv {
     fi
     
     # set "v" parameter
-    if [ "$(eval "echo $`echo $1`_VECTOR)" = true ]; then
+    if [ "$(eval "echo $`echo $1`_VECTOR")" = true ]; then
         eval "$2=\"${!2} -v\""
     fi
     
