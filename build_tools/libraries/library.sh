@@ -131,6 +131,12 @@ function parameters_tool_riscv {
         eval "$2=\"${!2} -e\""
     fi
     
+    # set "v" parameter
+    if [ "$(eval "echo $`echo $1`_VECTOR)" = true ]; then
+        eval "$2=\"${!2} -v\""
+    fi
+    
+    
     # set "u" parameter
     local L_BUILD_USER="$(eval "echo $`echo $1`_USER")"
     
