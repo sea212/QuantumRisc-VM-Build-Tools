@@ -17,12 +17,8 @@ set -e
 # required tools
 TOOLS="build-essential git clang gcc meson ninja-build g++ python3-dev \
        make flex bison libc6 binutils gzip bzip2 tar perl autoconf m4 \
-<<<<<<< HEAD
        automake gettext gperf dejagnu expect tcl xdg-user-dirs \
        python-is-python3"
-=======
-       automake gettext gperf dejagnu expect tcl python-is-python3"
->>>>>>> added -v flag to build riscv with vector extensions
 
 # install and upgrade tools
 apt-get update
