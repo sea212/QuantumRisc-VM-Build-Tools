@@ -11,7 +11,9 @@ LIBRARY="../libraries/library.sh"
 REPO="https://github.com/ghdl/ghdl.git"
 REPO_LIBBACKTRACE="https://github.com/ianlancetaylor/libbacktrace.git"
 REPO_GCC="https://gcc.gnu.org/git/gcc.git"
+REPO_GHDL_YOSYS_PLUGIN="https://github.com/ghdl/ghdl-yosys-plugin"
 PROJ="ghdl"
+PROJ_GHDL_YOSYS_PLUGIN="ghdl-yosys-plugin"
 BUILDFOLDER="build_and_install_ghdl"
 VERSIONFILE="installed_version.txt"
 TAG="latest"
@@ -21,13 +23,14 @@ CLEANUP=false
 BUILD_MCODE=false
 BUILD_LLVM=false
 BUILD_GCC=false
+BUILD_YOSYS_PLUGIN=''
 DEFAULT_PREFIX='/usr/local'
 GHDL_GCC_SUFFIX='-ghdl'
 BUILD_GCC_DEFAULT_CONFIG="--enable-languages=c,vhdl --disable-bootstrap \
 --disable-lto --disable-multilib --disable-libssp --program-suffix=${GHDL_GCC_SUFFIX}"
 
 # parse arguments
-USAGE="$(basename "$0") [-h] [-c] [-m] [-l] [-g] [-d dir] [-i path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory and version, install binaries and cleanup setup files.
+USAGE="$(basename "$0") [-h] [-c] [-l] [-m] [-g] [-y] [-d dir] [-i path] [-t tag] -- Clone latested tagged ${PROJ} version and build it. Optionally select the build directory and version, install binaries and cleanup setup files.
 
 where:
     -h          show this help text
@@ -35,12 +38,13 @@ where:
     -g          build GCC backend
     -l          build LLVM backend
     -m          build mcode backend
+    -y          build ghdl-yosys-plugin
     -d dir      build files in \"dir\" (default: ${BUILDFOLDER})
     -i path     install binaries to path (use \"default\" to use default path)
     -t tag      specify version (git tag or commit hash) to pull (default: Latest tag)"
    
  
-while getopts ':hi:cd:glmt:' OPTION; do
+while getopts ':hcglmyd:i:t:' OPTION; do
     case $OPTION in
         i)  INSTALL=true
             INSTALL_PREFIX="$OPTARG"
@@ -51,7 +55,7 @@ done
 
 OPTIND=1
 
-while getopts ':hi:cd:glmt:' OPTION; do
+while getopts ':hcglmyd:i:t:' OPTION; do
     case "$OPTION" in
         h)  echo "$USAGE"
             exit
@@ -71,6 +75,9 @@ while getopts ':hi:cd:glmt:' OPTION; do
             ;;
         m)  echo "-m set: Building MCODE backend for GHDL"
             BUILD_MCODE=true
+            ;;
+        y)  echo "-y set: Building ghdl yosys plugin"
+            BUILD_YOSYS_PLUGIN='--enable-synth'
             ;;
         d)  echo "-d set: Using folder $OPTARG"
             BUILDFOLDER="$OPTARG"
@@ -94,30 +101,23 @@ shift "$((OPTIND - 1))"
 function build_mcode {
     mkdir -p 'build_mcode'
     pushd 'build_mcode' > /dev/null
-    local L_FAKE_PREFIX="$(pwd -P)/adjust_filename"
-    ../configure --prefix="$L_FAKE_PREFIX"
-    make -j$(nproc)
     
     if [ $INSTALL = true ]; then
-        make install
-        # Add suffix (why does configure not offer it anyways?)
-        pushd $L_FAKE_PREFIX > /dev/null
-        
-        for L_FILE in `find . -iname ghdl -type f`; do
-            mv $L_FILE ${L_FILE}-mcode
-        done
-        
-        if [ "$INSTALL_PREFIX" != "default" ]; then
-            mkdir -p $INSTALL_PREFIX
-            cp -r ./* $INSTALL_PREFIX
-        else
-            mkdir -p $DEFAULT_PREFIX
-            cp -r ./* $DEFAULT_PREFIX
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            INSTALL_PREFIX="$DEFAULT_PREFIX"
         fi
-
-        popd > /dev/null
-        rm -r $L_FAKE_PREFIX
+    else
+        INSTALL_PREFIX="$(pwd -P)/build"
     fi
+        
+    mkdir -p "$INSTALL_PREFIX"
+    ../configure $BUILD_YOSYS_PLUGIN --prefix="$INSTALL_PREFIX"
+    make -j$(nproc)
+    
+    # ugly workarround: makefile offers no option to add a suffix, therefore
+    # two variants of ghdl (e.g. mcode and gcc) overwrite each other.
+    cp ghdl_mcode ghdl_mcode-mcode
+    make install EXEEXT='-mcode'
     
     popd > /dev/null
 }
@@ -125,43 +125,35 @@ function build_mcode {
 function build_llvm {
     mkdir -p 'build_llvm'
     pushd 'build_llvm' > /dev/null
-    local L_FAKE_PREFIX="$(pwd -P)/adjust_filename"
+    
+    if [ $INSTALL = true ]; then
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            INSTALL_PREFIX="$DEFAULT_PREFIX"
+        fi
+    else
+        INSTALL_PREFIX="$(pwd -P)/build"
+    fi
 
     # compile latest libbacktrace.a to compile ghdl-llvm with stack backtrace support
     if [ ! -d './libbacktrace' ]; then
         git clone --recursive "$REPO_LIBBACKTRACE" 'libbacktrace'
     fi
     
+    # build libbacktrace
     pushd 'libbacktrace' > /dev/null
     ./configure
     make -j$(nproc)
     local L_LIBBACKTRACE_PATH="$(pwd -P)/.libs/libbacktrace.a"
     popd > /dev/null
-    ../configure --with-llvm-config --with-backtrace-lib="$L_LIBBACKTRACE_PATH" --prefix="$L_FAKE_PREFIX"
+    
+    # build ghdl-llvm
+    ../configure $BUILD_YOSYS_PLUGIN --with-llvm-config --with-backtrace-lib="$L_LIBBACKTRACE_PATH" --prefix="$INSTALL_PREFIX"
     make -j$(nproc)
     
-    if [ $INSTALL = true ]; then
-        make install
-        
-        # Add suffix (why does configure not offer it anyways?)
-        pushd $L_FAKE_PREFIX > /dev/null
-        
-        for L_FILE in `find . -iname ghdl -type f`; do
-            mv $L_FILE ${L_FILE}-llvm
-        done
-        
-        if [ "$INSTALL_PREFIX" != "default" ]; then
-            mkdir -p $INSTALL_PREFIX
-            cp -r ./* $INSTALL_PREFIX
-        else
-            mkdir -p $DEFAULT_PREFIX
-            cp -r ./* $DEFAULT_PREFIX
-        fi
-        
-        popd > /dev/null
-        rm -r $L_FAKE_PREFIX
-    fi
-    
+    # ugly workarround: makefile offers no option to add a suffix, therefore
+    # two variants of ghdl (e.g. mcode and gcc) overwrite each other.
+    cp ghdl_llvm ghdl_llvm-llvm
+    make install EXEEXT='-llvm'
     popd > /dev/null
 }
 
@@ -171,7 +163,7 @@ function build_gcc {
         git clone --recursive "$REPO_GCC" 'gcc'
     fi
     
-    # checkout latest release and buld prerequisites
+    # checkout latest release and build prerequisites
     pushd 'gcc' > /dev/null
     local L_GCC_SRC_PATH=`pwd -P`
     select_and_get_project_version 'stable' 'THROWAWAY_VAR' 'releases/*'
@@ -181,37 +173,34 @@ function build_gcc {
     mkdir -p 'build_gcc'
     pushd 'build_gcc' > /dev/null
     
-    if [ "$INSTALL_PREFIX" != 'default' ]; then
-        ../configure --with-gcc="$L_GCC_SRC_PATH" --prefix="$INSTALL_PREFIX"
-        local L_GCC_CONFIG="--prefix=${INSTALL_PREFIX}"
+    if [ $INSTALL = true ]; then
+        if [ "$INSTALL_PREFIX" == "default" ]; then
+            INSTALL_PREFIX="$DEFAULT_PREFIX"
+        fi
     else
-        ../configure --with-gcc="$L_GCC_SRC_PATH"
-        local L_GCC_CONFIG=''
+        INSTALL_PREFIX="$(pwd -P)/build"
     fi
+    
+    ../configure $BUILD_YOSYS_PLUGIN --with-gcc="$L_GCC_SRC_PATH" --prefix="$INSTALL_PREFIX"
+    local L_GCC_CONFIG="--prefix=${INSTALL_PREFIX}"
     
     make -j$(nproc) copy-sources
     mkdir -p 'gcc-objs'
     pushd 'gcc-objs' > /dev/null
     
-    # Check if the gcc used to compile ghdl-gcc uses default pie
+    # check if the gcc used to compile ghdl-gcc uses default pie
     if [ `gcc -v 2>&1 | grep -c -- "--enable-default-pie"` -gt 0 ]; then
         L_GCC_CONFIG="${L_GCC_CONFIG} --enable-default-pie"
     fi
     
+    # compile gcc
     $L_GCC_SRC_PATH/configure $L_GCC_CONFIG $BUILD_GCC_DEFAULT_CONFIG
     make -j$(nproc)
-    
-    if [ $INSTALL = true ]; then
-        make install
-    fi
-    
+    make install
     popd > /dev/null
+    # compile ghdl
     make -j$(nproc) ghdllib
-    
-    if [ $INSTALL = true ]; then
-        make install
-    fi
-    
+    make install
     popd > /dev/null
 }
 
@@ -255,12 +244,32 @@ select_and_get_project_version "$TAG" "COMMIT_HASH"
 # build and install if wanted
 if [ $BUILD_MCODE = true ]; then
     build_mcode
+    PLUGIN_VARIANT='ghdl-mcode'
 fi
 if [ $BUILD_LLVM = true ]; then
     build_llvm
+    PLUGIN_VARIANT='ghdl-llvm'
 fi
 if [ $BUILD_GCC = true ]; then
     build_gcc
+    PLUGIN_VARIANT='ghdl'
+fi
+
+# build ghdl plugin for yosys if wanted
+if [ -n "$BUILD_YOSYS_PLUGIN" ]; then
+    # clone
+    if [ ! -d "$PROJ_GHDL_YOSYS_PLUGIN" ]; then
+        git clone --recursive "$REPO_GHDL_YOSYS_PLUGIN" "${PROJ_GHDL_YOSYS_PLUGIN%%/*}"
+    fi
+
+    pushd $PROJ_GHDL_YOSYS_PLUGIN > /dev/null
+    
+    # build
+    GHDL="${INSTALL_PREFIX}/bin/${PLUGIN_VARIANT}"
+    make -j$(nproc) GHDL="$GHDL"
+    
+    # install
+    make install GHDL="$GHDL"
 fi
 
 # return to first folder and store version

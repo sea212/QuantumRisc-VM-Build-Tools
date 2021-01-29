@@ -186,6 +186,11 @@ function parameters_tool_ghdl {
     if [ "$(eval "echo $`echo $1`_MCODE")" = true ]; then
         eval "$2=\"${!2} -m\""
     fi
+    
+    # Set "y" flag
+    if [ "$(eval "echo $`echo $1`_YOSYS")" = true ]; then
+        eval "$2=\"${!2} -y\""
+    fi
 }
 
 # Process common script parameters
