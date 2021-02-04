@@ -85,7 +85,7 @@ function get_latest {
     fi
     
     local LATEST_SCRIPT=`cat $2`
-    local SCRIPTS_ADAPTED=`echo "$1" | sed "s/.*${LATEST_SCRIPT} //"`
+    local SCRIPTS_ADAPTED=`echo "$1" | sed "s/.* ${LATEST_SCRIPT} //"`
     
     if [ "$SCRIPTS_ADAPTED" == "$1" ]; then
         local AT_END=true
