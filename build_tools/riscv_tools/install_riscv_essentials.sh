@@ -17,7 +17,7 @@ set -e
 # required tools
 TOOLS="autoconf automake autotools-dev curl python3 libmpc-dev libmpfr-dev \
       libgmp-dev gawk build-essential bison flex texinfo gperf libtool \
-      patchutils bc zlib1g-dev libexpat-dev"
+      patchutils bc zlib1g-dev libexpat-dev python-is-python3"
 
 # install and upgrade tools
 apt-get update
