@@ -15,7 +15,7 @@ fi
 set -e
 
 # required tools
-TOOLS="build-essential clang make"
+TOOLS="libftdi-dev libftdi1-dev libusb-dev build-essential clang make"
 
 # install and upgrade tools
 apt-get update
