@@ -14,7 +14,7 @@ Further information
 ===================
 
 | This project was sponsored by `RheinMain University`_ on behalf of `Prof. Dr. Steffen Reith`_, research director of the `QuantumRisc`_ project for `RheinMain University`_.
-| You can get the latest QuantumRisc-VM and RiscV-Toolchain that were built with the scripts provided in this repository, as well as examples that can be run on the VM, at the `Random Oracles`_ website. The VMs are also available in `IPFS`_ (ipns://k51qzi5uqu5dh8vlsenkplnznnmbh3kba3eby2j4rzuq5xynhmx9p5a30fyyc4).
+| You can get the latest QuantumRisc-VM and RiscV-Toolchain that were built with the scripts provided in this repository, as well as examples that can be run on the VM, at the `Random Oracles`_ website. The VMs are also available in `IPFS`_ (ipns://qrvm.haraldheckmann.de).
 | For further information regarding this GitHub project, refer to the `project documentation`_.
 
 .. Hyperlink-Images
