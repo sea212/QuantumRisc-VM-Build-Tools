@@ -234,3 +234,12 @@ Projects
 ~~~~~~~~
 
 All projects are only downloaded using the version that was specified in the configuration file :ref:`script-build_tools-config.cfg`. The downloaded files are placed in the "Documents" folder inside the home folder of all users who were specified in the configuration file. In addition, a symbolic link to the projects is placed on the desktop. Currently this part only works on English systems, because the folder names "Documents" and "Desktop" are hard-coded.
+
+Deriving a configuration file with fixed tool versions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The project offers a script that does derive a configuration from another configuration file and a version file. The final configuration file is a duplicate of the original configuration file, but it locks the tool versions to those used in the version file.
+
+Once you installed a set of tools using the *install_everything.sh* script and the corresponding *config.cfg* file, a file called *installed_versions.txt* is created in the build folder and in the same folder the *install_everything.sh* file is located in. A script called *versiondump_to_config.sh* is located in the *misc_tools* folder. This script can be invoked to derive the configuration file that locks the tool versions: ``versiondump_to_config.sh [-h] versionfile configfile outputfile``
+
+Given a specific git commit hash or tag of the QuantumRisc-VM build tools and the derived configuration file, anybody can recreate the exact same set of tools on their own system.
+
